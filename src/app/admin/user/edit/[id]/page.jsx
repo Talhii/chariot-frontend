@@ -9,7 +9,7 @@ import { use } from "react";
 
 const roles = ["Admin", "Manager", "Worker"];
 
-export default function EditUser({params}) {
+export default function EditUser({ params }) {
   const userId = use(params)?.id;
   return (
     <SidebarProvider>
@@ -23,7 +23,7 @@ export default function EditUser({params}) {
   );
 }
 
-export const Component = ({userId}) => {
+export const Component = ({ userId }) => {
 
   const router = useRouter();
   const [fullName, setFullName] = useState("");
@@ -48,7 +48,7 @@ export const Component = ({userId}) => {
           setRole(user.role || "");
           setUsername(user.username || "");
           setAccessCode(user.accessCode || "");
-          setImage(user.profileImage || null); // Assume the profile image is returned as a URL or base64 string
+          setImage(user.profileImage || null);
         } catch (err) {
           console.error("Error fetching user:", err);
           setError("Error fetching user data.");
@@ -67,7 +67,7 @@ export const Component = ({userId}) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file)); // Preview the image
+      setImage(URL.createObjectURL(file));
     }
   };
 
@@ -79,16 +79,16 @@ export const Component = ({userId}) => {
       fullName,
       role,
       username: role === "Worker" ? undefined : username,
-      password: password ? password : undefined, // Only update password if it's provided
+      password: password ? password : undefined,
       accessCode: role === "Worker" ? accessCode : undefined,
-      file: image ? image : undefined, // Include image if it's updated
+      file: image ? image : undefined,
     };
 
     const formData = new FormData();
     Object.keys(updatedUser).forEach((key) => {
       if (updatedUser[key]) {
         if (key === "file" && image) {
-          formData.append(key, e.target.image.files[0]); // Append the image file
+          formData.append(key, e.target.image.files[0]);
         } else {
           formData.append(key, updatedUser[key]);
         }
@@ -106,7 +106,7 @@ export const Component = ({userId}) => {
       });
 
       console.log("User Updated Successfully:", response.data);
-      router.push("/admin/user"); // Navigate back to the user list page after success
+      router.push("/admin/user");
     } catch (err) {
       console.error("Error updating user:", err);
       setError(err.response?.data?.message || "An error occurred while updating the user.");
@@ -210,7 +210,7 @@ export const Component = ({userId}) => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className={`px-6 py-3 bg-white text-black rounded-md hover:bg-blue-600 transition duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`px-6 py-3 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : "Save Changes"}

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import axios from "axios"
 
 export default function WorkerDashboard() {
   const [checkedStates, setCheckedStates] = useState({
@@ -33,6 +34,9 @@ export default function WorkerDashboard() {
 
   const [isScanning, setIsScanning] = useState(false)
   const qrReaderId = "reader"
+
+  // Piece data fetched from API
+  const [pieceDetails, setPieceDetails] = useState(null)
 
   useEffect(() => {
     let html5QrCode
@@ -65,27 +69,26 @@ export default function WorkerDashboard() {
         html5QrCode
           .stop()
           .then(() => html5QrCode.clear())
-          .catch(() => {})
+          .catch(() => { })
       }
       setScanned(true)
     }
   }, [isScanning])
 
-  const stopScanner = () => {
-    if (!isScanning) return
+  useEffect(() => {
+    if (scannedData) {
+      fetchPieceDetails(scannedData)
+    }
+  }, [scannedData])
 
-    Html5Qrcode.getCameras()
-      .then((cameras) => {
-        if (cameras.length) {
-          const html5QrCode = new Html5Qrcode("reader")
-          html5QrCode.stop().then(() => html5QrCode.clear())
-          setIsScanning(false)
-          setScanned(false)
-        }
-      })
-      .catch((err) => {
-        console.error("Error stopping QR scanner:", err)
-      })
+  const fetchPieceDetails = async (pieceId) => {
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.get(`${apiBaseUrl}/worker/piece/${pieceId}`)
+      setPieceDetails(response.data.data)
+    } catch (error) {
+      console.error("Error fetching piece details:", error)
+    }
   }
 
   const handlePictureChange = (e) => {
@@ -113,7 +116,7 @@ export default function WorkerDashboard() {
             <Button
               onClick={() => setScanned(false)}
               variant="outline"
-              className="bg-transparent border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white transition-colors"
+              className="bg-transparent border-blue-400 text-blue-400 hover:bg-gray-200 hover:text-white transition-colors"
             >
               Reset
             </Button>
@@ -146,11 +149,11 @@ export default function WorkerDashboard() {
               <div id={qrReaderId} className="w-64 h-64 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div>
               {scannedData && (
                 <p className="text-center mb-4 text-white">
-                  Scanned Data: <span className="font-bold text-teal-400">{scannedData}</span>
+                  Scanned Piece Successfully
                 </p>
               )}
               <Button
-                className="w-full bg-blue-600 bg-opacity-50 hover:bg-opacity-75 transition-colors"
+                className="w-full bg-white text-black hover:bg-gray-200 hover:text-black"
                 onClick={() => setIsScanning(!isScanning)}
               >
                 {isScanning ? "Stop Scanning" : "Start Scanning"}
@@ -159,7 +162,7 @@ export default function WorkerDashboard() {
           </Card>
         </div>
 
-        {scanned && (
+        {pieceDetails && (
           <Card className="mb-8 bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>
               <CardTitle
@@ -170,42 +173,70 @@ export default function WorkerDashboard() {
                 {expanded ? <HiChevronUp className="text-2xl" /> : <HiChevronDown className="text-2xl" />}
               </CardTitle>
             </CardHeader>
-            {expanded && (
+            {expanded && pieceDetails && (
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-white">
                   <div>
                     <p className="text-sm text-gray-400">Piece ID</p>
-                    <p className="text-lg font-medium">12345</p>
+                    <p className="text-lg font-medium">{pieceDetails._id}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Reference</p>
-                    <p className="text-lg font-medium">ABC-123</p>
+                    <p className="text-lg font-medium">{pieceDetails.refNumber || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Dimensions</p>
-                    <p className="text-lg font-medium">2.0 x 3.5 x 1.5</p>
+                    <p className="text-lg font-medium">{pieceDetails.dimensions || "Not available"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Drawing</p>
-                    <a href="#" className="text-lg font-medium text-blue-400 hover:text-blue-300">
-                      View Drawing
-                    </a>
+                    {pieceDetails.drawingUrl ? (
+                      <a href={pieceDetails.drawingUrl} className="text-lg font-medium text-blue-400 hover:text-blue-300">
+                        View Drawing
+                      </a>
+                    ) : (
+                      <p className="text-sm text-gray-500">No drawing available</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Status</p>
-                    <p className="text-lg font-medium text-green-400">In Progress</p>
+                    <p className="text-lg font-medium">{pieceDetails.status}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-400">History</p>
-                    <p className="text-lg font-medium">Completed Stage 2</p>
-                  </div>
+                </div>
+                <Separator className="my-4" />
+                <p className="text-lg font-medium text-gray-300">History</p>
+                <div className="space-y-4">
+                  {pieceDetails.history.length > 0 ? (
+                    pieceDetails.history.map((entry) => (
+                      <div key={entry.timestamp} className="space-y-2">
+                        <div className="flex items-center space-x-4">
+                          <p className="text-lg font-medium text-gray-200">
+                            {entry.stage ? `Stage ${entry.stage}` : "Stage N/A"}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            {new Date(entry.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                        {entry.photoUrl && (
+                          <img
+                            src={entry.photoUrl}
+                            alt={`Photo for stage ${entry.stage}`}
+                            className="max-w-full h-auto rounded-lg border border-gray-600"
+                          />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No history available</p>
+                  )}
                 </div>
               </CardContent>
             )}
+
           </Card>
         )}
 
-        {scanned && (
+        {pieceDetails && (
           <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>
               <CardTitle className="text-blue-400">Action Panel</CardTitle>
@@ -213,48 +244,26 @@ export default function WorkerDashboard() {
             <CardContent>
               <h3 className="text-xl font-semibold mb-4 text-teal-400">Inspection List</h3>
               <div className="space-y-4 mb-6 text-white">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="task1"
-                    checked={checkedStates.task1}
-                    onCheckedChange={() => handleCheckboxChange("task1")}
-                    className="border-blue-400 text-blue-400"
-                  />
-                  <label
-                    htmlFor="task1"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    QA Task 1: Inspect surface quality
-                  </label>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="task2"
-                    checked={checkedStates.task2}
-                    onCheckedChange={() => handleCheckboxChange("task2")}
-                    className="border-blue-400 text-blue-400"
-                  />
-                  <label
-                    htmlFor="task2"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    QA Task 2: Check dimensions
-                  </label>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="task3"
-                    checked={checkedStates.task3}
-                    onCheckedChange={() => handleCheckboxChange("task3")}
-                    className="border-blue-400 text-blue-400"
-                  />
-                  <label
-                    htmlFor="task3"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    QA Task 3: Test functionality
-                  </label>
-                </div>
+                {pieceDetails && pieceDetails.currentStage?.checklist?.length > 0 ? (
+                  pieceDetails.currentStage.checklist.map((task, index) => (
+                    <div key={task._id || index} className="flex items-center space-x-3">
+                      <Checkbox
+                        id={`task${index}`}
+                        checked={checkedStates[`task${index}`]}
+                        onCheckedChange={() => handleCheckboxChange(`task${index}`)}
+                        className="border-blue-400 text-blue-400"
+                      />
+                      <label
+                        htmlFor={`task${index}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {task.description || `QA Task ${index + 1}`}
+                      </label>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-white">No tasks available for inspection.</p>
+                )}
               </div>
 
               <Separator className="my-6 bg-gray-700" />
@@ -264,7 +273,7 @@ export default function WorkerDashboard() {
                 <div className="flex items-center justify-start w-full">
                   <label
                     htmlFor="picture"
-                    className="cursor-pointer px-4 py-2 bg-blue-600 bg-opacity-50 hover:bg-opacity-75 text-white rounded-md text-center w-[250px] transition-colors"
+                    className="cursor-pointer px-4 py-2 bg-white text-black hover:bg-gray-100 hover:text-black rounded-md text-center w-[250px] transition-colors"
                   >
                     Choose a picture
                   </label>
@@ -285,7 +294,7 @@ export default function WorkerDashboard() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-green-600 bg-opacity-50 hover:bg-opacity-75 transition-colors"
+                  className="bg-white text-black hover:bg-gray-100 hover:text-black"
                   disabled={isSubmitDisabled}
                 >
                   Submit & Move to Next Stage

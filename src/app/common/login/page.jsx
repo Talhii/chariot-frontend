@@ -93,19 +93,19 @@ export default function Login() {
               <div className="flex justify-center mb-6">
                 <div className="flex flex-1 gap-3 flex-wrap justify-center">
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "worker" ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "worker" ? "bg-blue-600 hover:bg-gray-200" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
                     onClick={() => handleRoleSelect("worker")}
                   >
                     Worker
                   </Button>
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "manager" ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "manager" ? "bg-blue-600 hover:bg-gray-200" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
                     onClick={() => handleRoleSelect("manager")}
                   >
                     Manager
                   </Button>
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "admin" ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "admin" ? "bg-blue-600 hover:bg-gray-200" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
                     onClick={() => handleRoleSelect("admin")}
                   >
                     Admin
@@ -152,7 +152,7 @@ export default function Login() {
               )}
 
               <div className="mt-6">
-                <Button onClick={handleLogin} className="w-full font-bold text-white bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleLogin} className="w-full font-bold text-white bg-blue-600 hover:bg-gray-200">
                   Login
                 </Button>
 

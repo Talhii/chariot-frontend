@@ -185,7 +185,7 @@ export const Component = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className={`px-6 py-3 bg-white text-black rounded-md hover:bg-blue-600 transition duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`px-6 py-3 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : "Save User"}

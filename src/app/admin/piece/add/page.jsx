@@ -25,9 +25,7 @@ const Component = () => {
         { id: 3, name: "Stage 3" }
     ];
 
-
     const router = useRouter();
-
     const [formData, setFormData] = useState({
         refNumber: "",
         dimensions: "",
@@ -64,13 +62,7 @@ const Component = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here, you would send the `formData` to your API or backend to save it
-        // For now, we will simulate a redirect after the form submission.
-        // You can implement the real API call for creating a new piece here.
-
-        // Example:
-        // await createPiece(formData); // Ensure you implement this function in your API
-        router.push("/admin/piece"); // Redirect to the pieces list page
+        router.push("/admin/piece");
     };
 
     return (
@@ -215,7 +207,7 @@ const Component = () => {
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            className="px-6 py-3 bg-white text-black rounded-md hover:bg-blue-600 transition duration-200"
+                            className="px-6 py-3 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200"
                         >
                             Save Piece
                         </button>
