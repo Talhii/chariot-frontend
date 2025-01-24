@@ -6,27 +6,15 @@ import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
+import { ToastContainer } from "react-toastify";
+import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Area, AreaChart, Tooltip, ResponsiveContainer } from "recharts"
 import { ArrowUp, ArrowDown, AlertCircle, CheckCircle2, Clock } from "lucide-react"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export default function AdminDashboard() {
-  return (
-    <SidebarProvider>
-      <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-        <AppSidebar className="dark hidden md:block" />
-        <SidebarInset className="bg-gradient-to-br from-gray-950 to-black flex-1 overflow-auto text-white w-full">
-          <Component />
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-  )
-}
-
-const Component = () => {
+export default function AdminDashboard  () {
   const [flaggedPieces, setFlaggedPieces] = useState([
     { id: "101", issue: "Crack on piece", worker: "John Doe" },
     { id: "102", issue: "Incorrect dimension", worker: "Jane Smith" },
@@ -39,7 +27,6 @@ const Component = () => {
     },
   }
 
-  // Dummy data for the dashboard
   const workers = [
     { name: "John Doe", processed: 50, piecesPerHour: 10, flagged: 1 },
     { name: "Jane Smith", processed: 45, piecesPerHour: 9, flagged: 0 },
@@ -331,6 +318,7 @@ const Component = () => {
           </div>
         </CardContent>
       </Card>
+      <ToastContainer />
     </div>
   )
 }

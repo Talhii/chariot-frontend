@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ToastContainer } from "react-toastify";
+import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function Login() {
-  const [selectedRole, setSelectedRole] = useState("")
-  const router = useRouter()
+  const [selectedRole, setSelectedRole] = useState("");
+  const router = useRouter();
 
-  const [accessCode, setAccessCode] = useState("")
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [errorMessage, setErrorMessage] = useState("")
+  const [accessCode, setAccessCode] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role)
@@ -24,21 +26,23 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
-      let response
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      let response;
 
       if (selectedRole === "worker") {
         response = await axios.post(`${apiBaseUrl}/login`, {
           accessCode,
           role: "Worker",
-        })
+        });
 
         if (response?.data?.success) {
-          router.push(`/${selectedRole}/dashboard`)
+          localStorage.setItem("token", response?.data?.token);
+          router.push(`/${selectedRole}/dashboard`);
         } else {
           setErrorMessage("Login failed. Please check your credentials.")
         }
       } else if (selectedRole === "manager" || selectedRole === "admin") {
+
         response = await axios.post(`${apiBaseUrl}/login`, {
           username,
           password,
@@ -46,6 +50,8 @@ export default function Login() {
         })
 
         if (response?.data?.success) {
+
+          localStorage.setItem("token", response?.data?.token);
           router.push(`/${selectedRole}/dashboard`)
         } else {
           setErrorMessage("Login failed. Please check your credentials.")
@@ -93,23 +99,24 @@ export default function Login() {
               <div className="flex justify-center mb-6">
                 <div className="flex flex-1 gap-3 flex-wrap justify-center">
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "worker" ? "bg-blue-600 hover:bg-gray-200" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "worker" ? "bg-blue-600 hover:bg-gray-200 hover:text-black" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
                     onClick={() => handleRoleSelect("worker")}
                   >
                     Worker
                   </Button>
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "manager" ? "bg-blue-600 hover:bg-gray-200" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "manager" ? "bg-blue-600 hover:bg-gray-200 hover:text-black" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
                     onClick={() => handleRoleSelect("manager")}
                   >
                     Manager
                   </Button>
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "admin" ? "bg-blue-600 hover:bg-gray-200" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "admin" ? "bg-blue-600 hover:bg-gray-200 hover:text-black" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
                     onClick={() => handleRoleSelect("admin")}
                   >
                     Admin
                   </Button>
+
                 </div>
               </div>
 
@@ -152,9 +159,13 @@ export default function Login() {
               )}
 
               <div className="mt-6">
-                <Button onClick={handleLogin} className="w-full font-bold text-white bg-blue-600 hover:bg-gray-200">
+                <Button
+                  onClick={handleLogin}
+                  className="w-full font-bold text-white bg-blue-600 hover:bg-gray-200 hover:text-black"
+                >
                   Login
                 </Button>
+
 
                 {errorMessage && <p className="text-red-400 text-sm text-center mt-2">{errorMessage}</p>}
               </div>
@@ -162,6 +173,7 @@ export default function Login() {
           </Card>
         </div>
       </div>
+      <ToastContainer />
     </div>
   )
 }

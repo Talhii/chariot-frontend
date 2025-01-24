@@ -2,27 +2,15 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
-export default function Orders() {
-  return (
-    <SidebarProvider>
-      <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-        <AppSidebar className="dark hidden md:block" />
-        <SidebarInset className="bg-gradient-to-br from-gray-950 to-black flex-1 overflow-auto text-white w-full">
-          <Component />
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-  );
-}
 
-const Component = () => {
+export default function Orders() {
   const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +25,7 @@ const Component = () => {
         setOrders(orders);
       } catch (error) {
         console.error("Error fetching orders:", error);
+        showErrorToast(`Error fetching orders ${error}`);
       }
     };
     fetchOrders();
@@ -110,7 +99,7 @@ const Component = () => {
                       : order.status === "In Progress"
                         ? "bg-blue-500 text-blue-900"
                         : "bg-green-500 text-green-900"
-                    }`}
+                      }`}
                   >
                     {order.status}
                   </span>

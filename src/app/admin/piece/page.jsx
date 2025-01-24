@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -10,21 +10,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function Pieces() {
-    return (
-        <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-            <SidebarProvider>
-                <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-                    <AppSidebar className="dark hidden md:block" />
-                    <SidebarInset className="bg-gradient-to-br from-gray-950 to-black flex-1 overflow-auto text-white w-full">
-                        <Component />
-                    </SidebarInset>
-                </div>
-            </SidebarProvider>
-        </div>
-    );
-}
-
-const Component = () => {
     const router = useRouter();
     const [pieces, setPieces] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,6 +23,7 @@ const Component = () => {
                 const pieces = await response.data.data;
                 setPieces(pieces);
             } catch (error) {
+                showErrorToast(`Error fetching pieces ${error}`);
                 console.error("Error fetching pieces:", error);
             }
         };
@@ -66,7 +52,7 @@ const Component = () => {
             setIsModalOpen(false);
             setPieceToDelete(null);
         } catch (error) {
-            showErrorToast("Error deleting piece", error);
+            showErrorToast(`Error deleting piece ${error}`);
         }
     };
 

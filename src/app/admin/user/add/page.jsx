@@ -2,26 +2,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { ToastContainer } from "react-toastify";
+import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar";
 
 const roles = ["Admin", "Manager", "Worker"];
 
 export default function AddUser() {
-  return (
-    <SidebarProvider>
-      <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-        <AppSidebar className="dark hidden md:block" />
-        <SidebarInset className="bg-gradient-to-br from-gray-950 to-black flex-1 overflow-auto text-white w-full">
-          <Component />
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
-  );
-}
-
-export const Component = () => {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState("");
@@ -79,10 +67,11 @@ export const Component = () => {
       });
 
       console.log("User Created Successfully:", response.data);
+      showSuccessToast("User Created Successfully");
       router.push("/admin/user");
     } catch (err) {
       console.error("Error creating user:", err);
-      setError(err.response?.data?.message || "An error occurred while creating the user.");
+      showErrorToast(`Error creating user ${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -193,6 +182,7 @@ export const Component = () => {
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 };

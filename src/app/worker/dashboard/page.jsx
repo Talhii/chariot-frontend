@@ -10,6 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
+import { ToastContainer } from "react-toastify";
+import { showErrorToast, showSuccessToast } from "@/lib/utils";
+
 
 export default function WorkerDashboard() {
   const [checkedStates, setCheckedStates] = useState({
@@ -31,12 +34,56 @@ export default function WorkerDashboard() {
   const [expanded, setExpanded] = useState(false)
   const [pictureSelected, setPictureSelected] = useState(false)
   const [pictureName, setPictureName] = useState("")
+  const [flagged, setFlagged] = useState(false);
 
   const [isScanning, setIsScanning] = useState(false)
   const qrReaderId = "reader"
 
-  // Piece data fetched from API
   const [pieceDetails, setPieceDetails] = useState(null)
+
+  const handleSubmit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.error("No token found in localStorage");
+        showErrorToast(`You are not authenticated.`);
+        return;
+      }
+
+      const stageNumber = pieceDetails.currentStage?.number;
+
+      const formData = new FormData();
+      formData.append("file", document.getElementById("picture").files[0]);
+      formData.append("stageNumber", stageNumber);
+      formData.append("notes", notes);
+      formData.append("flagged", flagged);
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.put(
+        `${apiBaseUrl}/worker/piece/${scannedData}`,
+        formData,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      showSuccessToast("Piece successfully updated. Moving to the next stage.");
+
+      setScannedData("");
+      setIsScanning(false);
+      setPictureSelected(false);
+      setNotes("");
+      setCheckedStates({ task1: false, task2: false, task3: false }); // Reset the checklist
+
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      showErrorToast(`Error submitting data ${error}`);
+    }
+  };
+
 
   useEffect(() => {
     let html5QrCode
@@ -87,6 +134,7 @@ export default function WorkerDashboard() {
       const response = await axios.get(`${apiBaseUrl}/worker/piece/${pieceId}`)
       setPieceDetails(response.data.data)
     } catch (error) {
+      showErrorToast(`Error fetching piece details ${error}`);
       console.error("Error fetching piece details:", error)
     }
   }
@@ -116,7 +164,7 @@ export default function WorkerDashboard() {
             <Button
               onClick={() => setScanned(false)}
               variant="outline"
-              className="bg-transparent border-blue-400 text-blue-400 hover:bg-gray-200 hover:text-white transition-colors"
+              className="bg-transparent border-blue-400 text-blue-400 hover:bg-gray-200 hover:text-black transition-colors"
             >
               Reset
             </Button>
@@ -283,6 +331,15 @@ export default function WorkerDashboard() {
               </div>
 
               <div className="mb-6">
+                <Checkbox
+                  checked={flagged}
+                  onCheckedChange={(checked) => setFlagged(checked)}
+                  className="border-blue-400 text-blue-400"
+                />
+                <span className="ml-3 text-white text-lg">Flagged</span>
+              </div>
+
+              <div className="mb-6">
                 <h3 className="text-xl font-semibold mb-4 text-teal-400">Add Notes</h3>
                 <Textarea
                   placeholder="Enter any important notes or defects"
@@ -296,6 +353,7 @@ export default function WorkerDashboard() {
                 <Button
                   className="bg-white text-black hover:bg-gray-100 hover:text-black"
                   disabled={isSubmitDisabled}
+                  onClick={handleSubmit}
                 >
                   Submit & Move to Next Stage
                 </Button>
@@ -304,6 +362,7 @@ export default function WorkerDashboard() {
           </Card>
         )}
       </div>
+      <ToastContainer />
     </div>
   )
 }

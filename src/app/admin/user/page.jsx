@@ -2,27 +2,13 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function Users() {
-    return (
-        <SidebarProvider>
-            <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-                <AppSidebar className="dark hidden md:block" />
-                <SidebarInset className="bg-gradient-to-br from-gray-950 to-black flex-1 overflow-auto text-white w-full">
-                    <Component />
-                </SidebarInset>
-            </div>
-        </SidebarProvider>
-    );
-}
-
-const Component = () => {
     const router = useRouter();
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const [users, setUsers] = useState([]);
@@ -49,7 +35,7 @@ const Component = () => {
                     console.error("Error fetching users");
                 }
             } catch (err) {
-                showErrorToast("Error fetching users", err);
+                showErrorToast(`Error fetching users ${err}`);
                 console.error("Error fetching users", err);
             }
         };
@@ -91,7 +77,7 @@ const Component = () => {
             setUserToDelete(null);
             showSuccessToast("User deleted successfully");
         } catch (error) {
-            showErrorToast("Error deleting user", error);
+            showErrorToast(`Error deleting user ${error}`);
             console.error("Error deleting user", error);
         }
     };
