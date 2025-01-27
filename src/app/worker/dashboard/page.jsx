@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
+import jwtDecode from 'jsonwebtoken/decode'
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export default function WorkerDashboard() {
   const [pictureSelected, setPictureSelected] = useState(false)
   const [pictureName, setPictureName] = useState("")
   const [flagged, setFlagged] = useState(false);
+  const [user, setUser] = useState(null)
 
   const qrReaderId = "reader"
 
@@ -78,6 +80,31 @@ export default function WorkerDashboard() {
     }))
   }
 
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+
+    if (token) {
+      const decodedToken = jwtDecode(token)
+      const userId = decodedToken.user.id
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+      axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      })
+        .then((response) => {
+          console.log(response.data.data)
+          setUser(response.data.data)
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error)
+        })
+    } else {
+      router.push("/");
+    }
+  }, [])
+
   useEffect(() => {
     let html5QrCode
 
@@ -124,7 +151,14 @@ export default function WorkerDashboard() {
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await axios.get(`${apiBaseUrl}/worker/piece/${pieceId}`)
-      setPieceDetails(response.data.data)
+      const pieceDetailsData = response.data.data;
+
+      if (pieceDetailsData?.currentStage.number == user.stage.number) {
+        setPieceDetails(response.data.data)
+      }
+      else {
+        showErrorToast("Piece is not in this stage")
+      }
       setScannedData("")
     } catch (error) {
       showErrorToast(`Error fetching piece details ${error}`);
@@ -157,7 +191,7 @@ export default function WorkerDashboard() {
             <Button
               onClick={() => setPieceDetails(null)}
               variant="outline"
-              className="bg-transparent border-blue-400 text-blue-400 hover:bg-gray-200 hover:text-black transition-colors"
+              className="bg-white text-black hover:bg-gray-200"
             >
               Reset
             </Button>
@@ -166,7 +200,7 @@ export default function WorkerDashboard() {
                 <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
-              <span className="font-medium text-white">John Doe</span>
+              <span className="font-medium text-white">{user?.fullName}</span>
             </div>
           </div>
         </header>
@@ -177,7 +211,7 @@ export default function WorkerDashboard() {
               <CardTitle className="text-blue-400">Assigned Stage</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold text-white">Processing - Stage 3</p>
+              <p className="text-2xl font-semibold text-white">{user?.stage?.name}</p>
               <Badge className="mt-2 bg-blue-500 bg-opacity-50 text-white">In Progress</Badge>
             </CardContent>
           </Card>
@@ -249,20 +283,37 @@ export default function WorkerDashboard() {
                 <div className="space-y-4">
                   {pieceDetails.history.length > 0 ? (
                     pieceDetails.history.map((entry) => (
-                      <div key={entry.timestamp} className="space-y-2">
-                        <div className="flex items-center space-x-4">
-                          <p className="text-lg font-medium text-gray-200">
-                            {entry.stage ? `Stage ${entry.stage}` : "Stage N/A"}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            {new Date(entry.timestamp).toLocaleString()}
-                          </p>
+                      <div key={entry.timestamp} className="space-y-3 bg-gray-800 p-4 rounded-lg shadow-md">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <p className="text-lg font-semibold text-gray-200">
+                              {entry.stage ? `Stage ${entry.stage}` : "Stage N/A"}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {new Date(entry.timestamp).toLocaleString()}
+                            </p>
+                          </div>
+                          {entry.flagged && (
+                            <span className="text-xs text-red-500 font-bold bg-red-100 px-2 py-1 rounded-full">
+                              Flagged
+                            </span>
+                          )}
                         </div>
+                        {entry.workerId && (
+                          <p className="text-sm text-gray-300">
+                            <strong>Worker:</strong> {entry.workerId.fullName}
+                          </p>
+                        )}
+                        {entry.notes && (
+                          <p className="text-sm text-gray-400">
+                            <strong>Notes:</strong> {entry.notes}
+                          </p>
+                        )}
                         {entry.photoUrl && (
                           <img
                             src={entry.photoUrl}
                             alt={`Photo for stage ${entry.stage}`}
-                            className="max-w-full h-auto rounded-lg border border-gray-600"
+                            className="max-w-full h-auto rounded-lg border border-gray-600 mt-2"
                           />
                         )}
                       </div>
@@ -271,6 +322,7 @@ export default function WorkerDashboard() {
                     <p className="text-sm text-gray-500">No history available</p>
                   )}
                 </div>
+
               </CardContent>
             )}
 
@@ -314,7 +366,7 @@ export default function WorkerDashboard() {
                 <div className="flex items-center justify-start w-full">
                   <label
                     htmlFor="picture"
-                    className="cursor-pointer px-4 py-2 bg-white text-black hover:bg-gray-100 hover:text-black rounded-md text-center w-[250px] transition-colors"
+                    className="cursor-pointer px-4 py-2 bg-white text-black hover:bg-gray-200 hover:text-black rounded-md text-center w-[250px] transition-colors"
                   >
                     Choose a picture
                   </label>
@@ -344,7 +396,7 @@ export default function WorkerDashboard() {
 
               <div className="flex justify-end">
                 <Button
-                  className="bg-white text-black hover:bg-gray-100 hover:text-black"
+                  className="bg-white text-black hover:bg-gray-200 hover:text-black"
                   disabled={isSubmitDisabled}
                   onClick={handleSubmit}
                 >

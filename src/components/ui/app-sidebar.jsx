@@ -33,26 +33,17 @@ export function AppSidebar({ className, ...props }) {
   const { isMobile, openMobile, setOpenMobile } = useSidebar()
   const router = useRouter();
 
-  // State for user data and logout dropdown visibility
   const [user, setUser] = useState(null)
-
-  // Fetch user data on mount
   useEffect(() => {
-    // Get the token from localStorage
-    const token = localStorage.getItem('token') // Replace 'token' with your actual key in localStorage
+    const token = localStorage.getItem('token')
 
     if (token) {
-      // Decode the token to get user data (including user ID)
       const decodedToken = jwtDecode(token)
-
-      // Assuming your token contains a userId field or similar
       const userId = decodedToken.user.id
-
-      // Make the API call to fetch user data using the userId and token in headers
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
       axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,  // Pass token in the Authorization header
+          'Authorization': `Bearer ${token}`,
         }
       })
         .then((response) => {
@@ -66,12 +57,9 @@ export function AppSidebar({ className, ...props }) {
     }
   }, [])
 
-  // Handle logout (simplified for now)
   const handleLogout = () => {
-
-    localStorage.removeItem('token') // Remove token from localStorage
+    localStorage.removeItem('token')
     router.push("/");
-    // Redirect to login page or perform other actions
   }
 
   return (
@@ -95,7 +83,7 @@ export function AppSidebar({ className, ...props }) {
                   <Link key={index} href={item.path}>
                     <SidebarMenuItem className="mb-4">
                       <SidebarMenuButton
-                        className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors duration-200 rounded-lg"
+                        className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-200 hover:text-white transition-colors duration-200 rounded-lg"
                       >
                         <item.icon className="h-6 w-6" />
                         <span className="text-lg">{item.label}</span>
@@ -130,7 +118,7 @@ export function AppSidebar({ className, ...props }) {
               <div className="mt-2 p-2 bg-gray-700 rounded-md">
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left text-red-500 hover:bg-gray-600 p-2 rounded-md flex items-center"
+                  className="w-full text-left text-red-500 hover:bg-gray-200 p-2 rounded-md flex items-center"
                 >
                   <LogOut className="h-5 w-5 mr-2" />
                   Log Out
@@ -165,7 +153,7 @@ export function AppSidebar({ className, ...props }) {
                       <Link key={index} href={item.path}>
                         <SidebarMenuItem className="mb-4">
                           <SidebarMenuButton
-                            className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors duration-200 rounded-lg"
+                            className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-200 hover:text-white transition-colors duration-200 rounded-lg"
                           >
                             <item.icon className="h-6 w-6" />
                             <span className="text-lg">{item.label}</span>

@@ -1,61 +1,43 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToastContainer } from "react-toastify";
+import axios from "axios";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Area, AreaChart, Tooltip, ResponsiveContainer } from "recharts"
 import { ArrowUp, ArrowDown, AlertCircle, CheckCircle2, Clock } from "lucide-react"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-export default function AdminDashboard  () {
-  const [flaggedPieces, setFlaggedPieces] = useState([
-    { id: "101", issue: "Crack on piece", worker: "John Doe" },
-    { id: "102", issue: "Incorrect dimension", worker: "Jane Smith" },
-  ])
+export default function AdminDashboard() {
+
+  const [dashboardData, setDashboardData] = useState({})
+
+  useEffect(() => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/admin/dashboard`);
+        const dashboardData = response.data.data;
+        setDashboardData(dashboardData);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        showErrorToast(`Error fetching orders ${error}`);
+      }
+    };
+    fetchData();
+  }, [])
 
   const chartConfig = {
-    desktop: {
-      label: "Desktop",
+    piece: {
+      label: "piece",
       color: "blue",
     },
   }
-
-  const workers = [
-    { name: "John Doe", processed: 50, piecesPerHour: 10, flagged: 1 },
-    { name: "Jane Smith", processed: 45, piecesPerHour: 9, flagged: 0 },
-    { name: "Bob Johnson", processed: 55, piecesPerHour: 11, flagged: 2 },
-    { name: "Alice Brown", processed: 48, piecesPerHour: 9.5, flagged: 1 },
-  ]
-
-  const stages = [
-    { id: "stage1", name: "Stage 1", status: "Completed", pieces: 10 },
-    { id: "stage2", name: "Stage 2", status: "In Progress", pieces: 8 },
-    { id: "stage3", name: "Stage 3", status: "Pending", pieces: 5 },
-    { id: "stage4", name: "Stage 4", status: "Pending", pieces: 7 },
-    { id: "stage5", name: "Stage 5", status: "Pending", pieces: 6 },
-  ]
-
-  const orders = [
-    { id: "#12345", status: "In Progress", flagged: false },
-    { id: "#67890", status: "Pending", flagged: false },
-    { id: "#54321", status: "Flagged", flagged: true },
-    { id: "#98765", status: "Completed", flagged: false },
-    { id: "#24680", status: "In Progress", flagged: false },
-  ]
-
-  const chartData = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-  ]
 
   const generateReport = () => {
     console.log("Report Generated")
@@ -126,14 +108,14 @@ export default function AdminDashboard  () {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className={`lg:col-span-2 ${cardStyle}`}>
           <CardHeader>
-            <CardTitle className="text-gray-50">Weekly Production</CardTitle>
+            <CardTitle className="text-gray-50">Daily Production</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <ChartContainer config={chartConfig}>
                 <AreaChart
                   accessibilityLayer
-                  data={chartData}
+                  data={dashboardData?.chartData?.length > 0 && dashboardData.chartData}
                   margin={{
                     left: 12,
                     right: 12,
@@ -141,7 +123,7 @@ export default function AdminDashboard  () {
                 >
                   <CartesianGrid vertical={false} />
                   <XAxis
-                    dataKey="month"
+                    dataKey="day"
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
@@ -149,11 +131,11 @@ export default function AdminDashboard  () {
                   />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
                   <Area
-                    dataKey="desktop"
+                    dataKey="piece"
                     type="natural"
-                    fill="var(--color-desktop)"
+                    fill="var(--color-piece)"
                     fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
+                    stroke="var(--color-piece)"
                   />
                 </AreaChart>
               </ChartContainer>
@@ -165,13 +147,13 @@ export default function AdminDashboard  () {
             <CardTitle className="text-gray-50">Stages Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            {stages.map((stage) => (
-              <div key={stage.id} className="mb-4">
+            {dashboardData?.stages?.length > 0 && dashboardData.stages.map((stage) => (
+              <div key={stage._id} className="mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-300">{stage.name}</span>
-                  <span className="text-sm font-medium text-gray-50">{stage.pieces} pieces</span>
+                  <span className="text-sm font-medium text-gray-50">{stage.pieceCount} pieces</span>
                 </div>
-                <Progress value={(stage.pieces / 20) * 100} className="h-2 bg-gray-600" />
+                <Progress value={(stage.pieceCount / stage.totalPieces) * 100} className="h-2 bg-gray-600" />
               </div>
             ))}
           </CardContent>
@@ -179,34 +161,7 @@ export default function AdminDashboard  () {
       </div>
 
       {/* Workers and Orders */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card className={cardStyle}>
-          <CardHeader>
-            <CardTitle className="text-gray-50">Top Workers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-gray-50">Name</TableHead>
-                  <TableHead className="text-gray-50">Processed</TableHead>
-                  <TableHead className="text-gray-50">Pieces/Hour</TableHead>
-                  <TableHead className="text-gray-50">Flagged</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {workers.map((worker) => (
-                  <TableRow key={worker.name}>
-                    <TableCell className="text-gray-50">{worker.name}</TableCell>
-                    <TableCell className="text-gray-50">{worker.processed}</TableCell>
-                    <TableCell className="text-gray-50">{worker.piecesPerHour}</TableCell>
-                    <TableCell className="text-gray-50">{worker.flagged}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-6 mb-8">
         <Card className={cardStyle}>
           <CardHeader>
             <CardTitle className="text-gray-50">Recent Orders</CardTitle>
@@ -216,14 +171,20 @@ export default function AdminDashboard  () {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-gray-50">Order ID</TableHead>
+                  <TableHead className="text-gray-50">Project Name</TableHead>
+                  <TableHead className="text-gray-50">Customer Name</TableHead>
+                  <TableHead className="text-gray-50">Due Date</TableHead>
                   <TableHead className="text-gray-50">Status</TableHead>
                   <TableHead className="text-gray-50">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="text-gray-50">{order.id}</TableCell>
+                {dashboardData?.orders?.length > 0 && dashboardData.orders.map((order) => (
+                  <TableRow key={order._id}>
+                    <TableCell className="text-gray-50">{order._id}</TableCell>
+                    <TableCell className="text-gray-50">{order.projectName}</TableCell>
+                    <TableCell className="text-gray-50">{order.customerName}</TableCell>
+                    <TableCell className="text-gray-50">{new Date(order.dueDate).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === "Completed"
@@ -251,6 +212,7 @@ export default function AdminDashboard  () {
         </Card>
       </div>
 
+
       {/* Action Center */}
       <Card className={cardStyle}>
         <CardHeader>
@@ -260,21 +222,24 @@ export default function AdminDashboard  () {
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-50">Resolve Flagged Pieces</h4>
-              {flaggedPieces.length === 0 ? (
+              {!dashboardData?.flaggedPieces?.length > 0 ? (
                 <p className="text-gray-300">No flagged pieces to resolve.</p>
               ) : (
                 <div className="space-y-4">
-                  {flaggedPieces.map((piece, index) => (
+                  {dashboardData?.flaggedPieces?.length > 0 && dashboardData.flaggedPieces.map((piece, index) => (
                     <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg shadow">
                       <div>
-                        <p className="font-medium text-gray-50">Piece ID: {piece.id}</p>
+                        <p className="font-medium text-gray-50">Piece ID: {piece._id}</p>
                         <p className="text-sm text-gray-300">Issue: {piece.issue}</p>
                         <p className="text-sm text-gray-300">Worker: {piece.worker}</p>
                       </div>
                       <Button
                         variant="outline"
                         className="bg-white text-black hover:bg-gray-200"
-                        onClick={() => setFlaggedPieces((prev) => prev.filter((_, i) => i !== index))}
+                        onClick={() => setDashboardData(prev => ({
+                          ...prev,
+                          flaggedPieces: prev.flaggedPieces.filter((_, i) => i !== index)
+                        }))}
                       >
                         Resolve
                       </Button>
@@ -291,7 +256,7 @@ export default function AdminDashboard  () {
                     <SelectValue placeholder="Select Worker" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    {workers.map((worker) => (
+                    {dashboardData?.workers?.length > 0 && dashboardData.workers.map((worker) => (
                       <SelectItem key={worker.name} value={worker.name}>
                         {worker.name}
                       </SelectItem>
@@ -303,8 +268,8 @@ export default function AdminDashboard  () {
                     <SelectValue placeholder="Select Stage" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    {stages.map((stage) => (
-                      <SelectItem key={stage.id} value={stage.id}>
+                    {dashboardData?.stages?.length > 0 && dashboardData.stages.map((stage) => (
+                      <SelectItem key={stage._id} value={stage._id}>
                         {stage.name}
                       </SelectItem>
                     ))}

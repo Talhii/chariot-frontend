@@ -131,7 +131,7 @@ export default function Orders() {
               </button>
               <button
                 onClick={handleCancelDelete}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-200"
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-200 transition duration-200"
               >
                 Cancel
               </button>
