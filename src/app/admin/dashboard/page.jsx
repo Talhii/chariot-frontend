@@ -10,8 +10,6 @@ import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Area, AreaChart, Tooltip, ResponsiveContainer } from "recharts"
 import { ArrowUp, ArrowDown, AlertCircle, CheckCircle2, Clock } from "lucide-react"
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 export default function AdminDashboard  () {

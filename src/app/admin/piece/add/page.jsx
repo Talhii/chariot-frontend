@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar"
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 

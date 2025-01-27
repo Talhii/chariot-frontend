@@ -15,28 +15,16 @@ import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 
 export default function WorkerDashboard() {
-  const [checkedStates, setCheckedStates] = useState({
-    task1: false,
-    task2: false,
-    task3: false,
-  })
-
-  const handleCheckboxChange = (task) => {
-    setCheckedStates((prevState) => ({
-      ...prevState,
-      [task]: !prevState[task],
-    }))
-  }
+  const [checkedStates, setCheckedStates] = useState({})
+  const [scannedData, setScannedData] = useState("")
+  const [isScanning, setIsScanning] = useState(false)
 
   const [notes, setNotes] = useState("")
-  const [scannedData, setScannedData] = useState("")
-  const [scanned, setScanned] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [pictureSelected, setPictureSelected] = useState(false)
   const [pictureName, setPictureName] = useState("")
   const [flagged, setFlagged] = useState(false);
 
-  const [isScanning, setIsScanning] = useState(false)
   const qrReaderId = "reader"
 
   const [pieceDetails, setPieceDetails] = useState(null)
@@ -61,7 +49,7 @@ export default function WorkerDashboard() {
 
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await axios.put(
-        `${apiBaseUrl}/worker/piece/${scannedData}`,
+        `${apiBaseUrl}/worker/piece/${pieceDetails._id}`,
         formData,
         {
           headers: {
@@ -70,13 +58,12 @@ export default function WorkerDashboard() {
           },
         }
       );
-      showSuccessToast("Piece successfully updated. Moving to the next stage.");
 
-      setScannedData("");
-      setIsScanning(false);
       setPictureSelected(false);
       setNotes("");
-      setCheckedStates({ task1: false, task2: false, task3: false }); // Reset the checklist
+      setCheckedStates({});
+      showSuccessToast("Piece successfully updated. Moving to the next stage.");
+      setPieceDetails(null)
 
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -84,6 +71,12 @@ export default function WorkerDashboard() {
     }
   };
 
+  const handleCheckboxChange = (task) => {
+    setCheckedStates((prevState) => ({
+      ...prevState,
+      [task]: !prevState[task],
+    }))
+  }
 
   useEffect(() => {
     let html5QrCode
@@ -118,7 +111,6 @@ export default function WorkerDashboard() {
           .then(() => html5QrCode.clear())
           .catch(() => { })
       }
-      setScanned(true)
     }
   }, [isScanning])
 
@@ -133,6 +125,7 @@ export default function WorkerDashboard() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
       const response = await axios.get(`${apiBaseUrl}/worker/piece/${pieceId}`)
       setPieceDetails(response.data.data)
+      setScannedData("")
     } catch (error) {
       showErrorToast(`Error fetching piece details ${error}`);
       console.error("Error fetching piece details:", error)
@@ -162,7 +155,7 @@ export default function WorkerDashboard() {
           </div>
           <div className="flex items-center gap-8">
             <Button
-              onClick={() => setScanned(false)}
+              onClick={() => setPieceDetails(null)}
               variant="outline"
               className="bg-transparent border-blue-400 text-blue-400 hover:bg-gray-200 hover:text-black transition-colors"
             >

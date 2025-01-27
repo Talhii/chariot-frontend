@@ -4,25 +4,36 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/ui/app-sidebar"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import jwt from 'jsonwebtoken';
 
 const AdminLayout = ({ children }) => {
     const router = useRouter();
-    const [isAuthenticated, setIsAuthenticated] = useState(null);  // Track authentication state
+    const [isAuthenticated, setIsAuthenticated] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
 
-        if (!token) {
-            // If no token, navigate to the login page and don't render the layout
-            router.push("/");  // Redirect to login page
-        } else {
-            setIsAuthenticated(true);  // Token exists, authenticate the user
+        if (token) {
+            try {
+                const decodedToken = jwt.decode(token);
+                if (decodedToken && decodedToken.user.role == "Admin") {
+                    setIsAuthenticated(true);
+                } else {
+                    router.push("/");
+                }
+            } catch (err) {
+                console.error('Error decoding token', err);
+                router.push("/");
+            }
         }
-    }, [router]); // Only re-run effect if `router` changes (it rarely changes in most cases)
+        else {
+            router.push("/");
+        }
 
-    if (isAuthenticated === null) {
-        // Wait until authentication check is complete (this prevents any content rendering)
-        return null; // Don't render anything until we know the user is authenticated
+    }, [router]);
+
+    if (!isAuthenticated) {
+        return null;
     }
 
     return (

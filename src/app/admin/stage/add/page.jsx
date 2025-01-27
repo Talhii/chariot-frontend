@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar";
 
 export default function AddStage() {
     const router = useRouter();

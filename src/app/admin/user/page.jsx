@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";

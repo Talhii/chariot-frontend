@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar";
 
 const roles = ["Admin", "Manager", "Worker"];
 
@@ -42,14 +40,14 @@ export default function AddUser() {
       username: role === "Worker" ? undefined : username,
       password: role === "Worker" ? undefined : password,
       accessCode: role === "Worker" ? accessCode : undefined,
-      file: image ? image : undefined, // Pass image as file
+      file: image ? image : undefined,
     };
 
     const formData = new FormData();
     Object.keys(newUser).forEach((key) => {
       if (newUser[key]) {
         if (key === "file") {
-          formData.append(key, e.target.image.files[0]); // Append the image file
+          formData.append(key, e.target.image.files[0]);
         } else {
           formData.append(key, newUser[key]);
         }

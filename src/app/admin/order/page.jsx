@@ -2,8 +2,6 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -50,8 +48,8 @@ export default function Orders() {
       } else {
         throw new Error("Failed to delete order");
       }
-      setIsModalOpen(false); // Close the modal after deletion
-      setOrderToDelete(null); // Reset the order to delete
+      setIsModalOpen(false);
+      setOrderToDelete(null);
     } catch (error) {
       showErrorToast("Failed to Delete Order")
     }

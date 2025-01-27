@@ -2,8 +2,6 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/ui/app-sidebar";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -48,7 +46,6 @@ export default function Stages() {
 
     const deleteStage = async () => {
         try {
-            // Call the API to delete the stage
             const response = await axios.delete(`${apiBaseUrl}/admin/stage/${stageToDelete._id}`);
 
             if (response.status === 200 || response.status === 201) {
