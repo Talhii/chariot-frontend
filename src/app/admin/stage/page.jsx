@@ -29,7 +29,7 @@ export default function Stages() {
         };
 
         fetchStages();
-    }, []);
+    }, [stageToDelete]);
 
     const handleAddStageClick = () => {
         router.push("/admin/stage/add");
@@ -49,8 +49,6 @@ export default function Stages() {
             const response = await axios.delete(`${apiBaseUrl}/admin/stage/${stageToDelete._id}`);
 
             if (response.status === 200 || response.status === 201) {
-                // Remove the stage from the list in the state
-                setStages((prevStages) => prevStages.filter((stage) => stage._id !== stageToDelete._id));
                 setIsModalOpen(false);  // Close the modal
                 setStageToDelete(null);  // Reset the stageToDelete state
                 showSuccessToast("Stage deleted successfully.");

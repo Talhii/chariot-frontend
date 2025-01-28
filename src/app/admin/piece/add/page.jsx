@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "react-toastify";
+import axios from "axios";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function AddPiece() {
@@ -48,7 +49,16 @@ export default function AddPiece() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        router.push("/admin/piece");
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+
+        try {
+          const response = await axios.post(`${apiBaseUrl}/admin/piece`, formData);
+          showSuccessToast("Piece Created Successfully")
+        //   router.push("/admin/piece");
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+          showErrorToast(`Error fetching orders ${error}`);
+        }
     };
 
     return (

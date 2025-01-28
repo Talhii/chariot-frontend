@@ -23,9 +23,9 @@ import {
 const sidebarItems = [
   { icon: Home, label: "Dashboard", path: "/admin/dashboard" },
   { icon: FileText, label: "Orders", path: "/admin/order" },
-  { icon: Users, label: "Pieces", path: "/admin/piece" },  // Added Pieces
-  { icon: User, label: "Users", path: "/admin/user" },  // Added User
-  { icon: Layers, label: "Stages", path: "/admin/stage" },  // Added Stages
+  { icon: Users, label: "Pieces", path: "/admin/piece" },
+  { icon: User, label: "Users", path: "/admin/user" },
+  { icon: Layers, label: "Stages", path: "/admin/stage" },
   { icon: Settings, label: "Settings", path: "/admin/setting" },
 ]
 
@@ -66,7 +66,7 @@ export function AppSidebar({ className, ...props }) {
     <>
       {/* Sidebar */}
       <Sidebar
-        className={cn("border-r border-gray-800 bg-gray-900 w-64 shadow-lg", className)} // Added shadow for sidebar
+        className={cn("border-r border-gray-800 bg-gray-900 w-64 shadow-lg", className)}
         {...props}
       >
         {/* Sidebar Header */}
@@ -83,7 +83,7 @@ export function AppSidebar({ className, ...props }) {
                   <Link key={index} href={item.path}>
                     <SidebarMenuItem className="mb-4">
                       <SidebarMenuButton
-                        className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-200 hover:text-white transition-colors duration-200 rounded-lg"
+                        className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors duration-200 rounded-lg"
                       >
                         <item.icon className="h-6 w-6" />
                         <span className="text-lg">{item.label}</span>
@@ -102,7 +102,7 @@ export function AppSidebar({ className, ...props }) {
             <div className="flex items-center">
               {user.photoUrl ?
                 <img
-                  src={user.photoUrl} // Fallback image if photoUrl is not provided
+                  src={user.photoUrl}
                   alt="User Avatar"
                   className="h-12 w-12 rounded-full object-cover border-2 border-gray-600"
                 />
@@ -129,7 +129,6 @@ export function AppSidebar({ className, ...props }) {
         )}
       </Sidebar>
 
-      {/* Mobile Sidebar (Side Drawer) */}
       {isMobile && openMobile && (
         <div
           className={`fixed inset-0 bg-gray-950 bg-opacity-75 transition-all duration-300 transform ${openMobile ? 'translate-x-0' : '-translate-x-full'

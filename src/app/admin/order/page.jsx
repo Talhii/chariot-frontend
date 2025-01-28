@@ -27,23 +27,21 @@ export default function Orders() {
       }
     };
     fetchOrders();
-  }, []);
+  }, [orderToDelete]);
 
   const handleAddOrderClick = () => {
     router.push("/admin/order/add");
   };
 
   const handleDeleteOrderClick = (order) => {
-    setOrderToDelete(order); // Store the order to delete
-    setIsModalOpen(true); // Open the confirmation modal
+    setOrderToDelete(order);
+    setIsModalOpen(true);
   };
 
   const deleteOrder = async () => {
     try {
       const response = await axios.delete(`${apiBaseUrl}/admin/order/${orderToDelete._id}`);
-      console.log(response)
       if (response.status === 200) {
-        setOrders(orders.filter((order) => order._id !== orderToDelete._id)); // Remove deleted order from state
         showSuccessToast("Order Deleted Successfully")
       } else {
         throw new Error("Failed to delete order");
@@ -56,9 +54,13 @@ export default function Orders() {
   };
 
   const handleCancelDelete = () => {
-    setIsModalOpen(false); // Close the modal without deleting
-    setOrderToDelete(null); // Reset the order to delete
+    setIsModalOpen(false);
+    setOrderToDelete(null);
   };
+
+  const handleEditOrderClick = (stageId) => {
+    router.push(`/admin/order/edit/${stageId}`);
+};
 
   return (
     <div className="p-8">
@@ -103,7 +105,7 @@ export default function Orders() {
                   </span>
                 </td>
                 <td className="px-8 py-4">
-                  <button className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
+                  <button onClick={() => { handleEditOrderClick(order._id); }} className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
                   <button
                     onClick={() => handleDeleteOrderClick(order)}
                     className="ml-6 text-red-400 hover:text-red-600 text-lg"

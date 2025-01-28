@@ -39,7 +39,7 @@ export default function Users() {
         };
 
         fetchUsers();
-    }, [search, sortBy, sortOrder]);
+    }, [search, sortBy, sortOrder, userToDelete]);
 
     const toggleSortOrder = (column) => {
         if (sortBy === column) {
@@ -70,9 +70,8 @@ export default function Users() {
     const handleConfirmDelete = async () => {
         try {
             await axios.delete(`${apiBaseUrl}/admin/user/${userToDelete._id}`);
-            setUsers(prevUsers => prevUsers.filter(user => user._id !== userToDelete._id));
             setIsModalOpen(false);
-            setUserToDelete(null);
+            setUserToDelete(null); 
             showSuccessToast("User deleted successfully");
         } catch (error) {
             showErrorToast(`Error deleting user ${error}`);

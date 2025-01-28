@@ -26,7 +26,7 @@ export default function AddUser() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file)); // Preview the image
+      setImage(URL.createObjectURL(file));
     }
   };
 

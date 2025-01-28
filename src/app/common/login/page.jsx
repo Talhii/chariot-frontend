@@ -71,24 +71,15 @@ export default function Login() {
       <div className="layout-container flex h-full grow flex-col">
         <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-700 px-10 py-3">
           <div className="flex items-center gap-4 text-white">
-            <div className="size-4">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g clipPath="url(#clip0_6_543)">
-                  <path
-                    d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z"
-                    fill="currentColor"
-                  ></path>
-                </g>
-                <defs>
-                  <clipPath id="clip0_6_543">
-                    <rect width="48" height="48" fill="white"></rect>
-                  </clipPath>
-                </defs>
-              </svg>
+            <div className="w-32 h-16">
+              {/* Adjust the size of the logo */}
+              <img src="logo.jpg" alt="Logo" className="rounded-full" />
             </div>
             <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">Chariot</h2>
           </div>
         </header>
+
+
         <div className="px-4 md:px-40 flex flex-1 justify-center py-5">
           <Card className="w-full max-w-[512px] bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>

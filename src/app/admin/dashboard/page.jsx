@@ -16,6 +16,7 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 export default function AdminDashboard() {
 
   const [dashboardData, setDashboardData] = useState({})
+  const [dataChanged, setDataChanged] = useState(false);
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -30,7 +31,7 @@ export default function AdminDashboard() {
       }
     };
     fetchData();
-  }, [])
+  }, [dataChanged])
 
   const chartConfig = {
     piece: {
@@ -41,6 +42,20 @@ export default function AdminDashboard() {
 
   const generateReport = () => {
     console.log("Report Generated")
+  }
+
+  const resolveFlaggedPiece = async (pieceId) => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    try {
+      await axios.put(`${apiBaseUrl}/admin/piece/flagged/${pieceId}/resolved`);
+      showSuccessToast("Piece resolved Successfully")
+    } catch (error) {
+      console.error("Error resolving piece", error);
+      showErrorToast(`Error resolving piece ${error}`);
+    }
+
+    setDataChanged(true);
   }
 
   const cardStyle = "bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white"
@@ -236,10 +251,10 @@ export default function AdminDashboard() {
                       <Button
                         variant="outline"
                         className="bg-white text-black hover:bg-gray-200"
-                        onClick={() => setDashboardData(prev => ({
-                          ...prev,
-                          flaggedPieces: prev.flaggedPieces.filter((_, i) => i !== index)
-                        }))}
+                        onClick={() => {
+                          setDataChanged(false);
+                          resolveFlaggedPiece(piece._id)
+                        }}
                       >
                         Resolve
                       </Button>
@@ -257,8 +272,8 @@ export default function AdminDashboard() {
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
                     {dashboardData?.workers?.length > 0 && dashboardData.workers.map((worker) => (
-                      <SelectItem key={worker.name} value={worker.name}>
-                        {worker.name}
+                      <SelectItem key={worker.fullName} value={worker.fullName}>
+                        {worker.fullName}
                       </SelectItem>
                     ))}
                   </SelectContent>

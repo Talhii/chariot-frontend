@@ -27,7 +27,7 @@ export default function Pieces() {
         };
 
         fetchPieces();
-    }, []);
+    }, [pieceToDelete]);
 
     const handleAddPieceClick = () => {
         router.push("/admin/piece/add");
@@ -42,7 +42,6 @@ export default function Pieces() {
         try {
             const response = await axios.delete(`${apiBaseUrl}/admin/piece/${pieceToDelete._id}`);
             if (response.status === 200) {
-                setPieces(pieces.filter((piece) => piece._id !== pieceToDelete._id));
                 showSuccessToast("Piece deleted successfully");
             } else {
                 throw new Error("Failed to delete piece");
@@ -136,7 +135,6 @@ export default function Pieces() {
                 </div>
             )}
 
-            {/* Toast Notification Container */}
             <ToastContainer />
         </div>
     );
