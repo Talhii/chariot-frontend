@@ -37,12 +37,15 @@ const AdminLayout = ({ children }) => {
     }
 
     return (
-        <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
+        <div className="bg-black text-white flex h-screen w-full">
             <SidebarProvider>
                 <SidebarTrigger />
-                <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-                    <AppSidebar className="dark hidden md:block" />
-                    <SidebarInset className="bg-gradient-to-br from-gray-950 to-black flex-1 overflow-auto text-white w-full">
+                <div className="flex h-screen w-full">
+                    {/* Sidebar remains solid dark */}
+                    <AppSidebar className="dark w-64" />
+
+                    {/* Content area with backdrop blur */}
+                    <SidebarInset className="flex-1 overflow-auto bg-black text-white backdrop-blur-md">
                         {children}
                     </SidebarInset>
                 </div>

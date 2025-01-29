@@ -183,7 +183,7 @@ export default function WorkerDashboard() {
       <div className="max-w-7xl mx-auto p-6">
         <header className="flex justify-between items-center py-6 mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-400">
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-teal-400">
               Worker Dashboard
             </h1>
           </div>
@@ -191,7 +191,7 @@ export default function WorkerDashboard() {
             <Button
               onClick={() => setPieceDetails(null)}
               variant="outline"
-              className="bg-white text-black hover:bg-gray-200"
+              className="bg-white text-black hover:bg-gray-200 hover:text-black"
             >
               Reset
             </Button>
@@ -208,7 +208,7 @@ export default function WorkerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>
-              <CardTitle className="text-blue-400">Assigned Stage</CardTitle>
+              <CardTitle className="text-red-400">Assigned Stage</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-semibold text-white">{user?.stage?.name}</p>
@@ -218,7 +218,7 @@ export default function WorkerDashboard() {
 
           <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>
-              <CardTitle className="text-blue-400">QR Code Scanner</CardTitle>
+              <CardTitle className="text-red-400">QR Code Scanner</CardTitle>
             </CardHeader>
             <CardContent>
               <div id={qrReaderId} className="w-64 h-64 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div>

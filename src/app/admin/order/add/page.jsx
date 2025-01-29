@@ -3,8 +3,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import axios from "axios";
 
 export default function AddOrder() {
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -37,6 +40,15 @@ export default function AddOrder() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      const response = await axios.post(`${apiBaseUrl}/admin/order`, formData);
+      showSuccessToast("Order Created Successfully")
+      router.push("/admin/order");
+    } catch (error) {
+      console.error("Error creating order:", error);
+      showErrorToast(`Error creating order ${error}`);
+    }
 
     router.push("/admin/order");
   };
@@ -95,7 +107,7 @@ export default function AddOrder() {
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
             >
               <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
+              <option value="InProgress">InProgress</option>
               <option value="Completed">Completed</option>
             </select>
           </div>

@@ -114,7 +114,7 @@ export default function Users() {
                                     <td className="px-8 py-4">{user.fullName}</td>
                                     <td className="px-8 py-4">{user.role}</td>
                                     <td className="px-8 py-4">{user.username || "-"}</td>
-                                    <td className="px-8 py-4">
+                                    <td className="flex justify-content px-4 py-4">
                                         <button onClick={() => handleEditUserClick(user._id)} className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
                                         <button onClick={() => handleDeleteUserClick(user)} className="ml-6 text-red-400 hover:text-red-600 text-lg">Delete</button>
                                     </td>

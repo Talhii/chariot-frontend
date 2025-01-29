@@ -110,7 +110,7 @@ export default function Stages() {
                                         ))}
                                     </ul>
                                 </td>
-                                <td className="px-8 py-4">
+                                <td className="flex justify-content px-4 py-4">
                                     <button onClick={() => { handleEditStageClick(stage._id); }} className="text-blue-400 hover:text-blue-600">Edit</button>
                                     <button onClick={() => { handleDeleteStageClick(stage); }} className="ml-4 text-red-400 hover:text-red-600">Delete</button>
                                 </td>

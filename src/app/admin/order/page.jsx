@@ -33,6 +33,10 @@ export default function Orders() {
     router.push("/admin/order/add");
   };
 
+  const handleEditOrderClick = (orderId) => {
+    router.push(`/admin/order/edit/${orderId}`);
+  };
+
   const handleDeleteOrderClick = (order) => {
     setOrderToDelete(order);
     setIsModalOpen(true);
@@ -57,10 +61,6 @@ export default function Orders() {
     setIsModalOpen(false);
     setOrderToDelete(null);
   };
-
-  const handleEditOrderClick = (stageId) => {
-    router.push(`/admin/order/edit/${stageId}`);
-};
 
   return (
     <div className="p-8">
@@ -96,7 +96,7 @@ export default function Orders() {
                   <span
                     className={`px-4 py-2 rounded-full text-lg ${order.status === "Pending"
                       ? "bg-yellow-500 text-yellow-900"
-                      : order.status === "In Progress"
+                      : order.status === "InProgress"
                         ? "bg-blue-500 text-blue-900"
                         : "bg-green-500 text-green-900"
                       }`}
@@ -104,7 +104,7 @@ export default function Orders() {
                     {order.status}
                   </span>
                 </td>
-                <td className="px-8 py-4">
+                <td className="flex justify-content px-4 py-4">
                   <button onClick={() => { handleEditOrderClick(order._id); }} className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
                   <button
                     onClick={() => handleDeleteOrderClick(order)}
@@ -141,8 +141,7 @@ export default function Orders() {
           </div>
         </div>
       )}
-
-      {/* Toast Notification Container */}
+      
       <ToastContainer />
     </div>
   );

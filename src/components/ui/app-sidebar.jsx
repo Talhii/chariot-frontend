@@ -114,59 +114,18 @@ export function AppSidebar({ className, ...props }) {
               <span className="text-white px-4 text-lg font-semibold">{user.fullName}</span>
             </div>
 
-            {(
-              <div className="mt-2 p-2 bg-gray-700 rounded-md">
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left text-red-500 hover:bg-gray-200 p-2 rounded-md flex items-center"
-                >
-                  <LogOut className="h-5 w-5 mr-2" />
-                  Log Out
-                </button>
-              </div>
-            )}
+            <div className="mt-2 p-2 bg-gray-700 rounded-md">
+              <button
+                onClick={handleLogout}
+                className="w-full text-left text-red-500 hover:bg-gray-200 p-2 rounded-md flex items-center"
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                Log Out
+              </button>
+            </div>
           </div>
         )}
       </Sidebar>
-
-      {isMobile && openMobile && (
-        <div
-          className={`fixed inset-0 bg-gray-950 bg-opacity-75 transition-all duration-300 transform ${openMobile ? 'translate-x-0' : '-translate-x-full'
-            } z-40`}
-          onClick={() => setOpenMobile(false)}
-        >
-          <Sidebar
-            className="dark w-64 bg-gray-800 z-50"
-            {...props}
-          >
-            <SidebarHeader className="p-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">Admin Panel</h2>
-            </SidebarHeader>
-
-            {/* Sidebar Content */}
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {sidebarItems.map((item, index) => (
-                      <Link key={index} href={item.path}>
-                        <SidebarMenuItem className="mb-4">
-                          <SidebarMenuButton
-                            className="w-full justify-start gap-4 p-3 text-gray-400 hover:bg-gray-200 hover:text-white transition-colors duration-200 rounded-lg"
-                          >
-                            <item.icon className="h-6 w-6" />
-                            <span className="text-lg">{item.label}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      </Link>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-          </Sidebar>
-        </div>
-      )}
     </>
   )
 }

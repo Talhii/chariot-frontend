@@ -162,7 +162,7 @@ const Sidebar = React.forwardRef((
         style={{
           "--sidebar-width": SIDEBAR_WIDTH_MOBILE
         }}
-        side={side}
+        side={"right"}
       >
         <div className="flex h-full w-full flex-col">{children}</div>
       </SheetContent>

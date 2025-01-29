@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToastContainer } from "react-toastify";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp"
+
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function Login() {
@@ -13,13 +20,13 @@ export default function Login() {
   const router = useRouter();
 
   const [accessCode, setAccessCode] = useState("");
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role)
-    setAccessCode("")
     setUsername("")
     setPassword("")
   }
@@ -42,7 +49,6 @@ export default function Login() {
           setErrorMessage("Login failed. Please check your credentials.")
         }
       } else if (selectedRole === "manager" || selectedRole === "admin") {
-
         response = await axios.post(`${apiBaseUrl}/login`, {
           username,
           password,
@@ -50,7 +56,6 @@ export default function Login() {
         })
 
         if (response?.data?.success) {
-
           localStorage.setItem("token", response?.data?.token);
           router.push(`/${selectedRole}/dashboard`)
         } else {
@@ -59,7 +64,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Error during login:", error)
-      setErrorMessage("Login failed. Please check your credentials." + error)
+      setErrorMessage("Login failed. Please check your credentials.")
     }
   }
 
@@ -71,11 +76,7 @@ export default function Login() {
       <div className="layout-container flex h-full grow flex-col">
         <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-700 px-10 py-3">
           <div className="flex items-center gap-4 text-white">
-            <div className="w-32 h-16">
-              {/* Adjust the size of the logo */}
-              <img src="logo.jpg" alt="Logo" className="rounded-full" />
-            </div>
-            <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">Chariot</h2>
+
           </div>
         </header>
 
@@ -83,6 +84,9 @@ export default function Login() {
         <div className="px-4 md:px-40 flex flex-1 justify-center py-5">
           <Card className="w-full max-w-[512px] bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>
+              <div className="w-full h-16">
+                <img src="logo.jpg" alt="Logo" className="w-[150px] h-auto object-cover mb-4 mx-auto" />
+              </div>
               <CardTitle className="text-2xl font-bold text-center text-white">Welcome to Chariot</CardTitle>
               <p className="text-gray-300 text-center mt-2">Please select your role and enter your credentials</p>
             </CardHeader>
@@ -90,19 +94,19 @@ export default function Login() {
               <div className="flex justify-center mb-6">
                 <div className="flex flex-1 gap-3 flex-wrap justify-center">
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "worker" ? "bg-blue-600 hover:bg-gray-200 hover:text-black" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "worker" ? "bg-red-500 hover:bg-red-400" : "bg-white hover:bg-gray-200 text-black"}`}
                     onClick={() => handleRoleSelect("worker")}
                   >
                     Worker
                   </Button>
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "manager" ? "bg-blue-600 hover:bg-gray-200 hover:text-black" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "manager" ? "bg-red-500 hover:bg-red-400" : "bg-white hover:bg-gray-200 text-black"}`}
                     onClick={() => handleRoleSelect("manager")}
                   >
                     Manager
                   </Button>
                   <Button
-                    className={`min-w-[84px] ${selectedRole === "admin" ? "bg-blue-600 hover:bg-gray-200 hover:text-black" : "bg-gray-700 bg-opacity-50 hover:bg-opacity-75"}`}
+                    className={`min-w-[84px] ${selectedRole === "admin" ? "bg-red-500 hover:bg-red-400" : "bg-white hover:bg-gray-200 text-black"}`}
                     onClick={() => handleRoleSelect("admin")}
                   >
                     Admin
@@ -113,15 +117,27 @@ export default function Login() {
 
               {selectedRole === "worker" && (
                 <div className="space-y-4">
-                  <label className="block">
-                    <span className="text-white text-sm font-medium mb-1 block">Access code</span>
-                    <Input
-                      placeholder="Enter your 6-digit access code"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
-                      className="bg-gray-700 bg-opacity-50 border-gray-600 text-white placeholder-gray-400"
-                    />
+                  <label className="block w-full flex justify-center items-center">
+                    <div className="text-center">
+                      <span className="text-white text-sm font-medium mb-1 block">Access Code</span>
+                      <InputOTP
+                        maxLength={6}
+                        value={accessCode}
+                        onChange={(value) => setAccessCode(value)}
+                        className="flex justify-center items-center"
+                      >
+                        <InputOTPGroup className="flex">
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
                   </label>
+
                 </div>
               )}
 
@@ -152,7 +168,7 @@ export default function Login() {
               <div className="mt-6">
                 <Button
                   onClick={handleLogin}
-                  className="w-full font-bold text-white bg-blue-600 hover:bg-gray-200 hover:text-black"
+                  className="w-full font-bold bg-white text-black hover:bg-gray-200 hover:text-black"
                 >
                   Login
                 </Button>

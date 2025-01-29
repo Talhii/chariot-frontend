@@ -33,6 +33,10 @@ export default function Pieces() {
         router.push("/admin/piece/add");
     };
 
+    const handleEditPieceClick = (stageId) => {
+        router.push(`/admin/piece/edit/${stageId}`);
+    };
+
     const handleDeletePieceClick = (piece) => {
         setPieceToDelete(piece);
         setIsModalOpen(true);
@@ -92,7 +96,7 @@ export default function Pieces() {
                                     <span
                                         className={`px-4 py-2 rounded-full text-lg ${piece.status === "Pending"
                                             ? "bg-yellow-500 text-yellow-900"
-                                            : piece.status === "In Progress"
+                                            : piece.status === "InProgress"
                                                 ? "bg-blue-500 text-blue-900"
                                                 : piece.status === "Flagged"
                                                     ? "bg-red-500 text-red-900"
@@ -102,8 +106,8 @@ export default function Pieces() {
                                         {piece.status}
                                     </span>
                                 </td>
-                                <td className="px-8 py-4">
-                                    <button className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
+                                <td className="flex justify-content px-4 py-4">
+                                    <button onClick={() => { handleEditPieceClick(piece._id); }} className="text-blue-400 hover:text-blue-600 text-lg" >Edit</button>
                                     <button onClick={() => handleDeletePieceClick(piece)} className="ml-6 text-red-400 hover:text-red-600 text-lg">Delete</button>
                                 </td>
                             </tr>

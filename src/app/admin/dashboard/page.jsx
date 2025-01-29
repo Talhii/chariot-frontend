@@ -204,7 +204,7 @@ export default function AdminDashboard() {
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === "Completed"
                           ? "bg-green-700 text-green-100"
-                          : order.status === "In Progress"
+                          : order.status === "InProgress"
                             ? "bg-blue-700 text-blue-100"
                             : order.status === "Pending"
                               ? "bg-yellow-700 text-yellow-100"
@@ -272,24 +272,30 @@ export default function AdminDashboard() {
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
                     {dashboardData?.workers?.length > 0 && dashboardData.workers.map((worker) => (
-                      <SelectItem key={worker.fullName} value={worker.fullName}>
+                      <SelectItem key={worker.fullName} value={worker.fullName} className="text-white hover:text-white"
+                      >
                         {worker.fullName}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select className="bg-gray-700 text-white">
-                  <SelectTrigger className="bg-gray-700">
+                  <SelectTrigger className="bg-gray-700 text-white">
                     <SelectValue placeholder="Select Stage" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
                     {dashboardData?.stages?.length > 0 && dashboardData.stages.map((stage) => (
-                      <SelectItem key={stage._id} value={stage._id}>
+                      <SelectItem
+                        key={stage._id}
+                        value={stage._id}
+                        className="text-white hover:text-white"
+                      >
                         {stage.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+
                 <Button className="w-full bg-white text-black hover:bg-gray-200">Assign</Button>
               </div>
             </div>

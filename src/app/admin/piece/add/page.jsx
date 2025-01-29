@@ -1,26 +1,24 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import axios from "axios";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function AddPiece() {
-    const stages = [
-        { id: 1, name: "Stage 1" },
-        { id: 2, name: "Stage 2" },
-        { id: 3, name: "Stage 3" }
-    ];
+
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+    const [orders, setOrders ] = useState([])
 
     const router = useRouter();
     const [formData, setFormData] = useState({
+        orderId: "",
         refNumber: "",
         dimensions: "",
         currentStage: "",
         status: "Pending",
         flagged: false,
         qrCode: "",
-        history: []
     });
 
     const handleChange = (e) => {
@@ -30,36 +28,32 @@ export default function AddPiece() {
         });
     };
 
-    const handleAddHistory = () => {
-        setFormData({
-            ...formData,
-            history: [
-                ...formData.history,
-                {
-                    stage: formData.currentStage,
-                    workerId: "",
-                    timestamp: new Date().toISOString(),
-                    photoUrl: "",
-                    notes: "",
-                    flagged: false
-                }
-            ]
-        });
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
         try {
           const response = await axios.post(`${apiBaseUrl}/admin/piece`, formData);
           showSuccessToast("Piece Created Successfully")
-        //   router.push("/admin/piece");
+          router.push("/admin/piece");
         } catch (error) {
-          console.error("Error fetching orders:", error);
-          showErrorToast(`Error fetching orders ${error}`);
+          console.error("Error creating piece:", error);
+          showErrorToast(`Error creating piece ${error}`);
         }
     };
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+          try {
+            const response = await axios.get(`${apiBaseUrl}/admin/order`);
+            const orders = response.data.data;
+            setOrders(orders);
+          } catch (error) {
+            console.error("Error fetching orders:", error);
+            showErrorToast(`Error fetching orders ${error}`);
+          }
+        };
+        fetchOrders();
+      }, []);
 
     return (
         <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
@@ -95,18 +89,18 @@ export default function AddPiece() {
 
                     {/* Current Stage */}
                     <div>
-                        <label className="block text-lg text-gray-400 mb-2">Current Stage</label>
+                        <label className="block text-lg text-gray-400 mb-2">Orders</label>
                         <select
-                            name="currentStage"
-                            value={formData.currentStage}
+                            name="orderId"
+                            value={formData.orderId}
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
                         >
-                            <option value="">Select Stage</option>
-                            {stages.map((stage) => (
-                                <option key={stage.id} value={stage.name}>
-                                    {stage.name}
+                            <option value="">Select Order</option>
+                            {orders?.length > 0 && orders.map((order) => (
+                                <option key={order._id} value={order._id}>
+                                    {order.projectName}
                                 </option>
                             ))}
                         </select>
@@ -122,7 +116,7 @@ export default function AddPiece() {
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                         >
                             <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
+                            <option value="InProgress">InProgress</option>
                             <option value="Flagged">Flagged</option>
                             <option value="Completed">Completed</option>
                         </select>
@@ -153,50 +147,6 @@ export default function AddPiece() {
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
                         />
-                    </div>
-
-                    {/* History */}
-                    <div>
-                        <label className="block text-lg text-gray-400 mb-2">History</label>
-                        {formData.history.map((historyItem, index) => (
-                            <div key={index} className="space-y-4 mb-4">
-                                <div>
-                                    <label className="block text-gray-400">Stage: {historyItem.stage}</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Worker ID"
-                                        className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                                        value={historyItem.workerId}
-                                        onChange={(e) => {
-                                            const updatedHistory = [...formData.history];
-                                            updatedHistory[index].workerId = e.target.value;
-                                            setFormData({ ...formData, history: updatedHistory });
-                                        }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-gray-400">Notes</label>
-                                    <textarea
-                                        placeholder="Add notes"
-                                        className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                                        value={historyItem.notes}
-                                        onChange={(e) => {
-                                            const updatedHistory = [...formData.history];
-                                            updatedHistory[index].notes = e.target.value;
-                                            setFormData({ ...formData, history: updatedHistory });
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={handleAddHistory}
-                            className="text-blue-500 hover:text-blue-600 transition duration-200"
-                        >
-                            + Add History Item
-                        </button>
                     </div>
 
                     {/* Submit Button */}
