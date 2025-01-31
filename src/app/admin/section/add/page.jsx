@@ -5,22 +5,22 @@ import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
-export default function AddStage() {
+export default function AddSection() {
     const router = useRouter();
-    const [stages, setStages] = useState([]); // Assuming you have a state to manage stages
+    const [sections, setSections] = useState([]); // Assuming you have a state to manage sections
 
-    const [stageNumber, setStageNumber] = useState(stages.length + 1); // Set stage number dynamically
-    const [stageName, setStageName] = useState("");
+    const [sectionNumber, setSectionNumber] = useState(sections.length + 1); // Set section number dynamically
+    const [sectionName, setSectionName] = useState("");
     const [checklist, setChecklist] = useState([]);
     const [newTaskDescription, setNewTaskDescription] = useState("");
     const [isMandatory, setIsMandatory] = useState(false);
 
-    const handleStageNumberChange = (e) => {
-        setStageNumber(Number(e.target.value));
+    const handleSectionNumberChange = (e) => {
+        setSectionNumber(Number(e.target.value));
     };
 
-    const handleStageNameChange = (e) => {
-        setStageName(e.target.value);
+    const handleSectionNameChange = (e) => {
+        setSectionName(e.target.value);
     };
 
     const handleNewTaskDescriptionChange = (e) => {
@@ -55,43 +55,43 @@ export default function AddStage() {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
         try {
-            const response = await axios.post(`${apiBaseUrl}/admin/stage`, {
-                number: stageNumber,
-                name: stageName,
+            const response = await axios.post(`${apiBaseUrl}/admin/section`, {
+                number: sectionNumber,
+                name: sectionName,
                 checklist: checklist,
             });
 
-            router.push("/admin/stage");
+            router.push("/admin/section");
         } catch (error) {
-            console.error("Error creating stage:", error);
-            showErrorToast(`Error creating stage ${error}`);
+            console.error("Error creating section:", error);
+            showErrorToast(`Error creating section ${error}`);
         }
     };
 
     return (
         <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
             <div className="p-8 w-full">
-                <h2 className="text-3xl font-semibold text-white mb-8">Add New Stage</h2>
+                <h2 className="text-3xl font-semibold text-white mb-8">Add New Section</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Stage Number */}
+                    {/* Section Number */}
                     <div>
-                        <label className="block text-lg text-gray-400 mb-2">Stage Number</label>
+                        <label className="block text-lg text-gray-400 mb-2">Section Number</label>
                         <input
                             type="number"
-                            value={stageNumber}
-                            onChange={handleStageNumberChange}
+                            value={sectionNumber}
+                            onChange={handleSectionNumberChange}
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
                         />
                     </div>
 
-                    {/* Stage Name */}
+                    {/* Section Name */}
                     <div>
-                        <label className="block text-lg text-gray-400 mb-2">Stage Name</label>
+                        <label className="block text-lg text-gray-400 mb-2">Section Name</label>
                         <input
                             type="text"
-                            value={stageName}
-                            onChange={handleStageNameChange}
+                            value={sectionName}
+                            onChange={handleSectionNameChange}
                             placeholder="e.g., Cutting"
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
@@ -153,7 +153,7 @@ export default function AddStage() {
                             type="submit"
                             className="px-6 py-3 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200"
                         >
-                            Save Stage
+                            Save Section
                         </button>
                     </div>
                 </form>

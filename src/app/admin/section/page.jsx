@@ -7,77 +7,77 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
-export default function Stages() {
-    const [stages, setStages] = useState([]);
-    const [stageToDelete, setStageToDelete] = useState(null);
+export default function Sections() {
+    const [sections, setSections] = useState([]);
+    const [sectionToDelete, setSectionToDelete] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const router = useRouter();
 
     useEffect(() => {
-        const fetchStages = async () => {
+        const fetchSections = async () => {
             try {
-                const response = await axios.get(`${apiBaseUrl}/admin/stage`);
-                const stagesData = response.data.data;
-                if (stagesData.length > 0) {
-                    setStages(stagesData);
+                const response = await axios.get(`${apiBaseUrl}/admin/section`);
+                const sectionsData = response.data.data;
+                if (sectionsData.length > 0) {
+                    setSections(sectionsData);
                 } 
             } catch (error) {
-                showErrorToast(`Error fetching stages ${error}`);
-                console.error("Error fetching stages:", error);
+                showErrorToast(`Error fetching sections ${error}`);
+                console.error("Error fetching sections:", error);
             }
         };
 
-        fetchStages();
-    }, [stageToDelete]);
+        fetchSections();
+    }, [sectionToDelete]);
 
-    const handleAddStageClick = () => {
-        router.push("/admin/stage/add");
+    const handleAddSectionClick = () => {
+        router.push("/admin/section/add");
     };
 
-    const handleEditStageClick = (stageId) => {
-        router.push(`/admin/stage/edit/${stageId}`);
+    const handleEditSectionClick = (sectionId) => {
+        router.push(`/admin/section/edit/${sectionId}`);
     };
 
-    const handleDeleteStageClick = (stage) => {
-        setStageToDelete(stage);  // Store stage to delete
+    const handleDeleteSectionClick = (section) => {
+        setSectionToDelete(section);  // Store section to delete
         setIsModalOpen(true);      // Open the confirmation modal
     };
 
-    const deleteStage = async () => {
+    const deleteSection = async () => {
         try {
-            const response = await axios.delete(`${apiBaseUrl}/admin/stage/${stageToDelete._id}`);
+            const response = await axios.delete(`${apiBaseUrl}/admin/section/${sectionToDelete._id}`);
 
             if (response.status === 200 || response.status === 201) {
                 setIsModalOpen(false);  // Close the modal
-                setStageToDelete(null);  // Reset the stageToDelete state
-                showSuccessToast("Stage deleted successfully.");
+                setSectionToDelete(null);  // Reset the sectionToDelete state
+                showSuccessToast("Section deleted successfully.");
             } else {
-                throw new Error("Failed to delete stage");
+                throw new Error("Failed to delete section");
             }
         } catch (error) {
-            console.error("Error deleting stage:", error);
+            console.error("Error deleting section:", error);
             // Show a toast notification for the error
-            showErrorToast(`Failed to delete stage. Please try again. ${error}`);
+            showErrorToast(`Failed to delete section. Please try again. ${error}`);
         }
     };
 
     const handleCancelDelete = () => {
         setIsModalOpen(false);  // Close the modal without deleting
-        setStageToDelete(null);  // Reset the stageToDelete state
+        setSectionToDelete(null);  // Reset the sectionToDelete state
     };
 
     return (
         <div className="p-8">
             
             <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-semibold text-white">Stages</h2>
+                <h2 className="text-2xl font-semibold text-white">Sections</h2>
                 <button
-                    onClick={handleAddStageClick}
+                    onClick={handleAddSectionClick}
                     className="flex items-center px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
                 >
                     <Plus className="mr-2" />
-                    Add Stage
+                    Add Section
                 </button>
             </div>
 
@@ -85,20 +85,20 @@ export default function Stages() {
                 <table className="w-full text-left text-lg text-gray-400">
                     <thead className="bg-gray-900">
                         <tr>
-                            <th className="px-6 py-3">Stage Number</th>
-                            <th className="px-6 py-3">Stage</th>
+                            <th className="px-6 py-3">Section Number</th>
+                            <th className="px-6 py-3">Section</th>
                             <th className="px-6 py-3">Checklist</th>
                             <th className="px-6 py-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {stages && stages.length > 0 ? stages.map((stage) => (
-                            <tr key={stage._id} className="border-t border-gray-700">
-                                <td className="px-6 py-3">{stage.number}</td>
-                                <td className="px-6 py-3">{stage.name}</td>
+                        {sections && sections.length > 0 ? sections.map((section) => (
+                            <tr key={section._id} className="border-t border-gray-700">
+                                <td className="px-6 py-3">{section.number}</td>
+                                <td className="px-6 py-3">{section.name}</td>
                                 <td className="px-6 py-3">
                                     <ul>
-                                        {stage.checklist.map((task) => (
+                                        {section.checklist.map((task) => (
                                             <li key={task._id} className="text-gray-300">
                                                 {task.description}{" "}
                                                 {task.isMandatory ? (
@@ -111,14 +111,14 @@ export default function Stages() {
                                     </ul>
                                 </td>
                                 <td className="flex justify-content px-4 py-4">
-                                    <button onClick={() => { handleEditStageClick(stage._id); }} className="text-blue-400 hover:text-blue-600">Edit</button>
-                                    <button onClick={() => { handleDeleteStageClick(stage); }} className="ml-4 text-red-400 hover:text-red-600">Delete</button>
+                                    <button onClick={() => { handleEditSectionClick(section._id); }} className="text-blue-400 hover:text-blue-600">Edit</button>
+                                    <button onClick={() => { handleDeleteSectionClick(section); }} className="ml-4 text-red-400 hover:text-red-600">Delete</button>
                                 </td>
                             </tr>
                         )) : (
                             <tr>
                                 <td colSpan="4" className="px-8 py-4 text-center">
-                                    No Stages available
+                                    No Sections available
                                 </td>
                             </tr>
                         )}
@@ -130,10 +130,10 @@ export default function Stages() {
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-gray-900 text-white rounded-lg p-6 max-w-sm mx-auto">
-                        <h3 className="text-lg font-semibold mb-4">Are you sure you want to delete this stage?</h3>
+                        <h3 className="text-lg font-semibold mb-4">Are you sure you want to delete this section?</h3>
                         <div className="flex justify-between">
                             <button
-                                onClick={deleteStage}  // Call deleteStage instead of handleDeleteStageClick
+                                onClick={deleteSection}  // Call deleteSection instead of handleDeleteSectionClick
                                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
                             >
                                 Yes, Delete

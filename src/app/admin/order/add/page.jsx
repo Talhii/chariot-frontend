@@ -6,8 +6,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/utils";
 import axios from "axios";
 
 export default function AddOrder() {
-
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -15,42 +14,49 @@ export default function AddOrder() {
     customerName: "",
     dueDate: "",
     status: "Pending",
-    drawings: [{ refNumber: "", url: "" }],
+    drawings: null,
+    cuttingSheet: null,
   });
 
-  const handleChange = (e, index, field) => {
-    const updatedDrawings = [...formData.drawings];
-    if (index !== undefined) {
-      updatedDrawings[index][field] = e.target.value;
-      setFormData({ ...formData, drawings: updatedDrawings });
-    } else {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-      });
-    }
-  };
-
-  const handleAddDrawing = () => {
+  const handleDrawings = (e) => {
+    const file = e.target.files[0];
     setFormData({
       ...formData,
-      drawings: [...formData.drawings, { refNumber: "", url: "" }],
+      drawings: file,
+    });
+  };
+
+  const handleCuttingSheet = (e) => {
+    const file = e.target.files[0];
+    setFormData({
+      ...formData,
+      cuttingSheet: file,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const uploadData = new FormData();
+    uploadData.append("projectName", formData.projectName);
+    uploadData.append("customerName", formData.customerName);
+    uploadData.append("dueDate", formData.dueDate);
+    uploadData.append("status", formData.status);
+    uploadData.append("files", formData.drawings);
+    uploadData.append("files", formData.cuttingSheet);
+
     try {
-      const response = await axios.post(`${apiBaseUrl}/admin/order`, formData);
-      showSuccessToast("Order Created Successfully")
+      const response = await axios.post(`${apiBaseUrl}/admin/order`, uploadData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      showSuccessToast("Order Created Successfully");
       router.push("/admin/order");
     } catch (error) {
       console.error("Error creating order:", error);
-      showErrorToast(`Error creating order ${error}`);
+      showErrorToast(`Error creating order: ${error}`);
     }
-
-    router.push("/admin/order");
   };
 
   return (
@@ -65,7 +71,7 @@ export default function AddOrder() {
               type="text"
               name="projectName"
               value={formData.projectName}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
               required
             />
@@ -78,7 +84,7 @@ export default function AddOrder() {
               type="text"
               name="customerName"
               value={formData.customerName}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
               required
             />
@@ -91,7 +97,7 @@ export default function AddOrder() {
               type="date"
               name="dueDate"
               value={formData.dueDate}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
               required
             />
@@ -103,51 +109,45 @@ export default function AddOrder() {
             <select
               name="status"
               value={formData.status}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
             >
               <option value="Pending">Pending</option>
-              <option value="InProgress">InProgress</option>
+              <option value="InProgress">In Progress</option>
               <option value="Completed">Completed</option>
             </select>
           </div>
 
           {/* Drawings */}
           <div>
-            <label className="block text-lg text-gray-400 mb-2">Drawings</label>
-            {formData.drawings.map((drawing, index) => (
-              <div key={index} className="mb-4 flex gap-4">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    name="refNumber"
-                    value={drawing.refNumber}
-                    onChange={(e) => handleChange(e, index, "refNumber")}
-                    placeholder="Drawing Reference Number"
-                    className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                    required
-                  />
-                </div>
-                <div className="flex-1">
-                  <input
-                    type="url"
-                    name="url"
-                    value={drawing.url}
-                    onChange={(e) => handleChange(e, index, "url")}
-                    placeholder="Drawing URL"
-                    className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                    required
-                  />
-                </div>
+            <label className="block text-lg text-gray-400 mb-2">Drawings (PDF Only)</label>
+            <div className="mb-4 flex gap-4">
+              <div className="flex-1">
+                <input
+                  type="file"
+                  name="file"
+                  accept=".pdf"
+                  onChange={handleDrawings}
+                  className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
+                  required
+                />
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={handleAddDrawing}
-              className="text-blue-500 hover:text-blue-600 transition duration-200"
-            >
-              + Add Drawing
-            </button>
+            </div>
+
+            {/* Cutting Sheet */}
+            <label className="block text-lg text-gray-400 mb-2">Cutting Sheet (PDF Only)</label>
+            <div className="mb-4 flex gap-4">
+              <div className="flex-1">
+                <input
+                  type="file"
+                  name="file"
+                  accept=".pdf"
+                  onChange={handleCuttingSheet}
+                  className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
@@ -164,5 +164,4 @@ export default function AddOrder() {
       <ToastContainer />
     </div>
   );
-};
-
+}

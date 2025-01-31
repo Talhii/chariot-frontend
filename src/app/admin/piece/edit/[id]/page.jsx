@@ -8,11 +8,11 @@ import { showErrorToast, showSuccessToast } from "@/lib/utils";
 export default function EditPiece({ params }) {
     const pieceId = use(params)?.id;
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-    const [stages, setStages] = useState({})
+    const [sections, setSections] = useState({})
     const [formData, setFormData] = useState({
         refNumber: "",
         dimensions: "",
-        currentStage: "",
+        currentSection: "",
         status: "Pending",
         flagged: false,
         qrCode: "",
@@ -36,20 +36,20 @@ export default function EditPiece({ params }) {
     }, [pieceId]);
 
     useEffect(() => {
-        const fetchStages = async () => {
+        const fetchSections = async () => {
             try {
-                const response = await axios.get(`${apiBaseUrl}/admin/stage`);
-                const stagesData = response.data.data;
-                if (stagesData.length > 0) {
-                    setStages(stagesData);
+                const response = await axios.get(`${apiBaseUrl}/admin/section`);
+                const sectionsData = response.data.data;
+                if (sectionsData.length > 0) {
+                    setSections(sectionsData);
                 }
             } catch (error) {
-                showErrorToast(`Error fetching stages ${error}`);
-                console.error("Error fetching stages:", error);
+                showErrorToast(`Error fetching sections ${error}`);
+                console.error("Error fetching sections:", error);
             }
         };
 
-        fetchStages();
+        fetchSections();
     }, []);
 
     const handleChange = (e) => {
@@ -103,20 +103,20 @@ export default function EditPiece({ params }) {
                         />
                     </div>
 
-                    {/* Current Stage */}
+                    {/* Current Section */}
                     <div>
-                        <label className="block text-lg text-gray-400 mb-2">Stage</label>
+                        <label className="block text-lg text-gray-400 mb-2">Section</label>
                         <select
-                            name="currentStage"  // Bind the name of the current stage
-                            value={formData.currentStage ? formData.currentStage._id : ""}  // Ensure the correct value is selected
+                            name="currentSection"  // Bind the name of the current section
+                            value={formData.currentSection ? formData.currentSection._id : ""}  // Ensure the correct value is selected
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
                         >
-                            <option value="">Select Stage</option> {/* You can keep this option to handle cases where no stage is selected */}
-                            {stages?.length > 0 && stages.map((stage) => (
-                                <option key={stage._id} value={stage._id}>
-                                    {stage.name}
+                            <option value="">Select Section</option> {/* You can keep this option to handle cases where no section is selected */}
+                            {sections?.length > 0 && sections.map((section) => (
+                                <option key={section._id} value={section._id}>
+                                    {section.name}
                                 </option>
                             ))}
                         </select>

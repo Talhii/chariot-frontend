@@ -33,8 +33,8 @@ export default function Pieces() {
         router.push("/admin/piece/add");
     };
 
-    const handleEditPieceClick = (stageId) => {
-        router.push(`/admin/piece/edit/${stageId}`);
+    const handleEditPieceClick = (sectionId) => {
+        router.push(`/admin/piece/edit/${sectionId}`);
     };
 
     const handleDeletePieceClick = (piece) => {
@@ -81,7 +81,7 @@ export default function Pieces() {
                         <tr>
                             <th className="px-8 py-4">Reference Number</th>
                             <th className="px-8 py-4">Dimensions</th>
-                            <th className="px-8 py-4">Current Stage</th>
+                            <th className="px-8 py-4">Current Section</th>
                             <th className="px-8 py-4">Status</th>
                             <th className="px-8 py-4">Actions</th>
                         </tr>
@@ -91,7 +91,7 @@ export default function Pieces() {
                             <tr key={piece._id} className="border-t border-gray-700">
                                 <td className="px-8 py-4">{piece.refNumber}</td>
                                 <td className="px-8 py-4">{piece.dimensions}</td>
-                                <td className="px-8 py-4">{piece?.currentStage?.name}</td>
+                                <td className="px-8 py-4">{piece?.currentSection?.name}</td>
                                 <td className="px-8 py-4">
                                     <span
                                         className={`px-4 py-2 rounded-full text-lg ${piece.status === "Pending"

@@ -25,7 +25,7 @@ const sidebarItems = [
   { icon: FileText, label: "Orders", path: "/admin/order" },
   { icon: Users, label: "Pieces", path: "/admin/piece" },
   { icon: User, label: "Users", path: "/admin/user" },
-  { icon: Layers, label: "Stages", path: "/admin/stage" },
+  { icon: Layers, label: "Sections", path: "/admin/section" },
   { icon: Settings, label: "Settings", path: "/admin/setting" },
 ]
 

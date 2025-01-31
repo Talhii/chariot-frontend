@@ -36,7 +36,9 @@ const WorkerLayout = ({ children }) => {
     }
 
     return (
-        <WorkerDashboard/>
+       <>
+       {children}
+       </>
     );
 };
 

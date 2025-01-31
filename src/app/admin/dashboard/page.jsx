@@ -119,7 +119,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Chart and Stages */}
+      {/* Chart and Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className={`lg:col-span-2 ${cardStyle}`}>
           <CardHeader>
@@ -159,16 +159,16 @@ export default function AdminDashboard() {
         </Card>
         <Card className={cardStyle}>
           <CardHeader>
-            <CardTitle className="text-gray-50">Stages Overview</CardTitle>
+            <CardTitle className="text-gray-50">Sections Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            {dashboardData?.stages?.length > 0 && dashboardData.stages.map((stage) => (
-              <div key={stage._id} className="mb-4">
+            {dashboardData?.sections?.length > 0 && dashboardData.sections.map((section) => (
+              <div key={section._id} className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-300">{stage.name}</span>
-                  <span className="text-sm font-medium text-gray-50">{stage.pieceCount} pieces</span>
+                  <span className="text-sm font-medium text-gray-300">{section.name}</span>
+                  <span className="text-sm font-medium text-gray-50">{section.pieceCount} pieces</span>
                 </div>
-                <Progress value={(stage.pieceCount / stage.totalPieces) * 100} className="h-2 bg-gray-600" />
+                <Progress value={(section.pieceCount / section.totalPieces) * 100} className="h-2 bg-gray-600" />
               </div>
             ))}
           </CardContent>
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
               )}
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4 text-gray-50">Assign Workers to Stages</h4>
+              <h4 className="text-lg font-semibold mb-4 text-gray-50">Assign Workers to Sections</h4>
               <div className="space-y-4">
                 <Select className="bg-gray-700 text-white">
                   <SelectTrigger className="bg-gray-700">
@@ -281,16 +281,16 @@ export default function AdminDashboard() {
                 </Select>
                 <Select className="bg-gray-700 text-white">
                   <SelectTrigger className="bg-gray-700 text-white">
-                    <SelectValue placeholder="Select Stage" />
+                    <SelectValue placeholder="Select Section" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    {dashboardData?.stages?.length > 0 && dashboardData.stages.map((stage) => (
+                    {dashboardData?.sections?.length > 0 && dashboardData.sections.map((section) => (
                       <SelectItem
-                        key={stage._id}
-                        value={stage._id}
+                        key={section._id}
+                        value={section._id}
                         className="text-white hover:text-white"
                       >
-                        {stage.name}
+                        {section.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

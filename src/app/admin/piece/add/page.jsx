@@ -15,7 +15,7 @@ export default function AddPiece() {
         orderId: "",
         refNumber: "",
         dimensions: "",
-        currentStage: "",
+        currentSection: "",
         status: "Pending",
         flagged: false,
         qrCode: "",
@@ -87,7 +87,7 @@ export default function AddPiece() {
                         />
                     </div>
 
-                    {/* Current Stage */}
+                    {/* Current Section */}
                     <div>
                         <label className="block text-lg text-gray-400 mb-2">Orders</label>
                         <select
