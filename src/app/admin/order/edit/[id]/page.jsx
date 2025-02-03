@@ -14,7 +14,6 @@ export default function EditOrder({ params }) {
         projectName: "",
         customerName: "",
         dueDate: "",
-        status: "Pending",
         drawings: [{ refNumber: "", url: "" }],
     });
 
@@ -108,21 +107,6 @@ export default function EditOrder({ params }) {
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
                         />
-                    </div>
-
-                    {/* Status */}
-                    <div>
-                        <label className="block text-lg text-gray-400 mb-2">Status</label>
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                        >
-                            <option value="Pending">Pending</option>
-                            <option value="InProgress">InProgress</option>
-                            <option value="Completed">Completed</option>
-                        </select>
                     </div>
 
                     {/* Drawings */}

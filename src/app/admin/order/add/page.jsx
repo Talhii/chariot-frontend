@@ -13,7 +13,6 @@ export default function AddOrder() {
     projectName: "",
     customerName: "",
     dueDate: "",
-    status: "Pending",
     drawings: null,
     cuttingSheet: null,
   });
@@ -41,7 +40,6 @@ export default function AddOrder() {
     uploadData.append("projectName", formData.projectName);
     uploadData.append("customerName", formData.customerName);
     uploadData.append("dueDate", formData.dueDate);
-    uploadData.append("status", formData.status);
     uploadData.append("files", formData.drawings);
     uploadData.append("files", formData.cuttingSheet);
 
@@ -101,21 +99,6 @@ export default function AddOrder() {
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
               required
             />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="block text-lg text-gray-400 mb-2">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-            >
-              <option value="Pending">Pending</option>
-              <option value="InProgress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
           </div>
 
           {/* Drawings */}

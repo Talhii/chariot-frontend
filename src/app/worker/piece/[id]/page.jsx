@@ -69,8 +69,6 @@ export default function PieceDetails({ params }) {
       const response = await axios.get(`${apiBaseUrl}/worker/piece/${pieceId}`)
       const pieceDetailsData = response.data.data;
 
-      console.log(pieceDetailsData, user)
-
       if (pieceDetailsData?.currentSectionId?.number == user?.section?.number) {
         setPieceDetails(pieceDetailsData)
       } else {

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import jwt from 'jsonwebtoken';
-import WorkerDashboard from "./dashboard/page";
 
 const WorkerLayout = ({ children }) => {
     const router = useRouter();
@@ -11,7 +10,6 @@ const WorkerLayout = ({ children }) => {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-
         if (token) {
             try {
                 const decodedToken = jwt.decode(token);
