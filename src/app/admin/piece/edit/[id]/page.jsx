@@ -1,21 +1,24 @@
 "use client";
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { ToastContainer } from "react-toastify";
-import axios from "axios";
-import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { Button } from "@/components/ui/button"
+import { Flag, X } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import axios from "axios"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ToastContainer } from "react-toastify"
+import { showSuccessToast, showErrorToast } from "@/lib/utils"
+
 
 export default function EditPiece({ params }) {
     const pieceId = use(params)?.id;
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const [sections, setSections] = useState({})
     const [formData, setFormData] = useState({
-        refNumber: "",
-        dimensions: "",
-        currentSection: "",
-        status: "Pending",
-        flagged: false,
-        qrCode: "",
+        number: "",
+        currentSectionId: "",
+        status: "InProgress",
+        history: []
     });
     const router = useRouter();
 
@@ -78,26 +81,12 @@ export default function EditPiece({ params }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Reference Number */}
                     <div>
-                        <label className="block text-lg text-gray-400 mb-2">Reference Number</label>
+                        <label className="block text-lg text-gray-400 mb-2">Piece Number</label>
                         <input
                             type="text"
                             name="refNumber"
-                            value={formData.refNumber}
+                            value={formData.number}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                            required
-                        />
-                    </div>
-
-                    {/* Dimensions */}
-                    <div>
-                        <label className="block text-lg text-gray-400 mb-2">Dimensions</label>
-                        <input
-                            type="text"
-                            name="dimensions"
-                            value={formData.dimensions}
-                            onChange={handleChange}
-                            placeholder="e.g. 30x20x10 cm"
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
                         />
@@ -108,7 +97,7 @@ export default function EditPiece({ params }) {
                         <label className="block text-lg text-gray-400 mb-2">Section</label>
                         <select
                             name="currentSection"  // Bind the name of the current section
-                            value={formData.currentSection ? formData.currentSection._id : ""}  // Ensure the correct value is selected
+                            value={formData.currentSectionId ? formData.currentSectionId._id : ""}  // Ensure the correct value is selected
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                             required
@@ -132,38 +121,44 @@ export default function EditPiece({ params }) {
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
                         >
-                            <option value="Pending">Pending</option>
                             <option value="InProgress">InProgress</option>
                             <option value="Flagged">Flagged</option>
                             <option value="Completed">Completed</option>
                         </select>
                     </div>
 
-                    {/* Flagged */}
-                    <div>
-                        <label className="block text-lg text-gray-400 mb-2">Flagged</label>
-                        <input
-                            type="checkbox"
-                            name="flagged"
-                            checked={formData.flagged}
-                            onChange={(e) => setFormData({ ...formData, flagged: e.target.checked })}
-                            className="text-white"
-                        />
-                        <span className="ml-2 text-gray-400">Mark as Flagged</span>
-                    </div>
 
-                    {/* QR Code */}
-                    <div>
-                        <label className="block text-lg text-gray-400 mb-2">QR Code</label>
-                        <input
-                            type="text"
-                            name="qrCode"
-                            value={formData.qrCode}
-                            onChange={handleChange}
-                            placeholder="QR Code URL"
-                            className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                            required
-                        />
+                    <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 w-full max-w-md">
+                        <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
+                            <CardHeader className="flex justify-between items-center">
+                                <CardTitle className="text-white">Piece History</CardTitle>
+                            </CardHeader>
+                            <CardContent className="max-h-[60vh] overflow-y-auto">
+                                {formData.history && formData.history.length > 0 ? (
+                                    formData.history.map((entry, index) => (
+                                        <div key={index} className="flex items-center space-x-4 bg-gray-700 p-4 rounded-lg mb-4">
+                                            <Avatar className="w-10 h-10">
+                                                <AvatarImage src={entry.workerId.photoUrl} alt={entry.workerId.fullName} />
+                                                <AvatarFallback>{entry.workerId.fullName[0]}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-grow">
+                                                <p className="font-semibold text-white">{`${entry.workerId.fullName} (${entry.section.name})`}</p>
+                                                <p className="text-sm text-gray-400">{entry.timestamp}</p>
+                                            </div>
+                                            <div className="w-16 h-16 flex-shrink-0">
+                                                <img
+                                                    src={entry.photoUrl || "/placeholder.svg"}
+                                                    alt={`Piece Image ${index + 1}`}
+                                                    className="w-full h-full object-cover rounded-md cursor-pointer"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-white">No history available for this piece.</p>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
 
 

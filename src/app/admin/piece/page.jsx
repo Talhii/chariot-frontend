@@ -79,8 +79,7 @@ export default function Pieces() {
                 <table className="w-full text-left text-lg text-gray-400">
                     <thead className="bg-gray-900">
                         <tr>
-                            <th className="px-8 py-4">Reference Number</th>
-                            <th className="px-8 py-4">Dimensions</th>
+                            <th className="px-8 py-4">Piece Number</th>
                             <th className="px-8 py-4">Current Section</th>
                             <th className="px-8 py-4">Status</th>
                             <th className="px-8 py-4">Actions</th>
@@ -89,9 +88,8 @@ export default function Pieces() {
                     <tbody>
                         {pieces.map((piece) => (
                             <tr key={piece._id} className="border-t border-gray-700">
-                                <td className="px-8 py-4">{piece.refNumber}</td>
-                                <td className="px-8 py-4">{piece.dimensions}</td>
-                                <td className="px-8 py-4">{piece?.currentSection?.name}</td>
+                                <td className="px-8 py-4">{piece.number}</td>
+                                <td className="px-8 py-4">{piece?.currentSectionId?.name}</td>
                                 <td className="px-8 py-4">
                                     <span
                                         className={`px-4 py-2 rounded-full text-lg ${piece.status === "Pending"
