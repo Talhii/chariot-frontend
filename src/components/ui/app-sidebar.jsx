@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Users, FileText, Settings, User, Layers, LogOut } from 'lucide-react'
+import { Home, Users, FileText, User, Layers, LogOut } from 'lucide-react'
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import axios from 'axios'
@@ -25,7 +25,6 @@ const sidebarItems = [
   { icon: Users, label: "Pieces", path: "/admin/piece" },
   { icon: User, label: "Users", path: "/admin/user" },
   { icon: Layers, label: "Sections", path: "/admin/section" },
-  { icon: Settings, label: "Settings", path: "/admin/setting" },
 ]
 
 export function AppSidebar({ className, ...props }) {

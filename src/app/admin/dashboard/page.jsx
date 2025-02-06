@@ -62,7 +62,7 @@ export default function AdminDashboard() {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
     try {
-      await axios.put(`${apiBaseUrl}/admin/piece/flagged/${pieceId}/resolved`)
+      await axios.put(`${apiBaseUrl}/admin/piece/${pieceId}/resolve`)
       showSuccessToast("Piece resolved Successfully")
     } catch (error) {
       console.error("Error resolving piece", error)
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
           <CardContent className="flex items-center justify-between p-6">
             <div>
               <p className="text-sm font-medium text-gray-300">Total Pieces</p>
-              <p className="text-2xl font-bold text-gray-50">1,234</p>
+              <p className="text-2xl font-bold text-gray-50">{dashboardData?.counts?.pieceCount}</p>
             </div>
             <div className="bg-green-700 p-3 rounded-full">
               <ArrowUp className="h-6 w-6 text-green-300" />
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
           <CardContent className="flex items-center justify-between p-6">
             <div>
               <p className="text-sm font-medium text-gray-300">Flagged Pieces</p>
-              <p className="text-2xl font-bold text-gray-50">23</p>
+              <p className="text-2xl font-bold text-gray-50">{dashboardData?.counts?.flaggedPiecesCount}</p>
             </div>
             <div className="bg-red-700 p-3 rounded-full">
               <AlertCircle className="h-6 w-6 text-red-300" />
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
           <CardContent className="flex items-center justify-between p-6">
             <div>
               <p className="text-sm font-medium text-gray-300">Completed Orders</p>
-              <p className="text-2xl font-bold text-gray-50">89</p>
+              <p className="text-2xl font-bold text-gray-50">{dashboardData?.counts?.totalOrdersCount}</p>
             </div>
             <div className="bg-blue-700 p-3 rounded-full">
               <CheckCircle2 className="h-6 w-6 text-blue-300" />
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
           <CardContent className="flex items-center justify-between p-6">
             <div>
               <p className="text-sm font-medium text-gray-300">Pending Orders</p>
-              <p className="text-2xl font-bold text-gray-50">15</p>
+              <p className="text-2xl font-bold text-gray-50">{dashboardData?.counts?.pendingOrdersCount}</p>
             </div>
             <div className="bg-yellow-700 p-3 rounded-full">
               <Clock className="h-6 w-6 text-yellow-300" />
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-
+      
       {/* Chart and Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className={`lg:col-span-2 ${cardStyle}`}>

@@ -21,7 +21,7 @@ export default function Sections() {
                 const sectionsData = response.data.data;
                 if (sectionsData.length > 0) {
                     setSections(sectionsData);
-                } 
+                }
             } catch (error) {
                 showErrorToast(`Error fetching sections ${error}`);
                 console.error("Error fetching sections:", error);
@@ -47,7 +47,6 @@ export default function Sections() {
     const deleteSection = async () => {
         try {
             const response = await axios.delete(`${apiBaseUrl}/admin/section/${sectionToDelete._id}`);
-
             if (response.status === 200 || response.status === 201) {
                 setIsModalOpen(false);
                 setSectionToDelete(null);
