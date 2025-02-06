@@ -24,14 +24,16 @@ export default function EditUser({ params }) {
     username: "",
     password: "",
     accessCode: "",
+    section: "",
   })
   const [image, setImage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [sections, setSections] = useState([])
 
   useEffect(() => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
     const fetchUser = async () => {
       try {
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
         const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`)
         const user = response.data.data
 
@@ -41,6 +43,7 @@ export default function EditUser({ params }) {
           username: user.username || "",
           password: "",
           accessCode: user.accessCode || "",
+          section: user.section._id || "",
         })
         setImage(user.profileImage || null)
       } catch (error) {
@@ -49,9 +52,20 @@ export default function EditUser({ params }) {
       }
     }
 
+    const fetchSections = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/admin/section`)
+        setSections(response.data.data)
+      } catch (error) {
+        console.error("Error fetching sections:", error)
+        showErrorToast(`Error fetching sections: ${error}`)
+      }
+    }
+
     if (userId) {
       fetchUser()
     }
+    fetchSections()
   }, [userId])
 
   const handleChange = (name, value) => {
@@ -75,6 +89,7 @@ export default function EditUser({ params }) {
       username: formData.role === "Worker" ? undefined : formData.username,
       password: formData.password ? formData.password : undefined,
       accessCode: formData.role === "Worker" ? formData.accessCode : undefined,
+      section: formData.role === "Worker" ? formData.section : undefined,
     }
 
     const formDataToSend = new FormData()
@@ -170,17 +185,34 @@ export default function EditUser({ params }) {
                 )}
 
                 {formData.role === "Worker" && (
-                  <div className="text-white space-y-2">
-                    <Label htmlFor="accessCode">Access Code</Label>
-                    <Input
-                      id="accessCode"
-                      value={formData.accessCode}
-                      onChange={(e) => handleChange("accessCode", e.target.value)}
-                      placeholder="Access Code"
-                      className="bg-gray-800 text-white border-gray-700"
-                      required
-                    />
-                  </div>
+                  <>
+                    <div className="text-white space-y-2">
+                      <Label htmlFor="accessCode">Access Code</Label>
+                      <Input
+                        id="accessCode"
+                        value={formData.accessCode}
+                        onChange={(e) => handleChange("accessCode", e.target.value)}
+                        placeholder="Access Code"
+                        className="bg-gray-800 text-white border-gray-700"
+                        required
+                      />
+                    </div>
+                    <div className="text-white space-y-2">
+                      <Label htmlFor="section">Section</Label>
+                      <Select value={formData.section} onValueChange={(value) => handleChange("section", value)}>
+                        <SelectTrigger className="bg-gray-800 text-white border-gray-700">
+                          <SelectValue placeholder="Select Section" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 text-white border-gray-700">
+                          {sections.map((section) => (
+                            <SelectItem key={section._id} value={section._id}>
+                              {section.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -223,4 +255,3 @@ export default function EditUser({ params }) {
     </div>
   )
 }
-

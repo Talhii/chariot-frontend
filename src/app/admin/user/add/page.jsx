@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import { ToastContainer } from "react-toastify"
@@ -23,9 +23,26 @@ export default function AddUser() {
     username: "",
     password: "",
     accessCode: "",
+    section: "",
   })
   const [image, setImage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [sections, setSections] = useState([])
+
+  useEffect(() => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+    const fetchSections = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/admin/section`)
+        setSections(response.data.data)
+      } catch (error) {
+        console.error("Error fetching sections:", error)
+        showErrorToast(`Error fetching sections: ${error}`)
+      }
+    }
+
+    fetchSections()
+  }, [])
 
   const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -48,6 +65,7 @@ export default function AddUser() {
       username: formData.role === "Worker" ? undefined : formData.username,
       password: formData.role === "Worker" ? undefined : formData.password,
       accessCode: formData.role === "Worker" ? formData.accessCode : undefined,
+      section: formData.role === "Worker" ? formData.section : undefined,
     }
 
     const formDataToSend = new FormData()
@@ -144,17 +162,34 @@ export default function AddUser() {
                 )}
 
                 {formData.role === "Worker" && (
-                  <div className="text-white space-y-2">
-                    <Label htmlFor="accessCode">Access Code</Label>
-                    <Input
-                      id="accessCode"
-                      value={formData.accessCode}
-                      onChange={(e) => handleChange("accessCode", e.target.value)}
-                      placeholder="Access Code"
-                      className="bg-gray-800 text-white border-gray-700"
-                      required
-                    />
-                  </div>
+                  <>
+                    <div className="text-white space-y-2">
+                      <Label htmlFor="accessCode">Access Code</Label>
+                      <Input
+                        id="accessCode"
+                        value={formData.accessCode}
+                        onChange={(e) => handleChange("accessCode", e.target.value)}
+                        placeholder="Access Code"
+                        className="bg-gray-800 text-white border-gray-700"
+                        required
+                      />
+                    </div>
+                    <div className="text-white space-y-2">
+                      <Label htmlFor="section">Section</Label>
+                      <Select value={formData.section} onValueChange={(value) => handleChange("section", value)}>
+                        <SelectTrigger className="bg-gray-800 text-white border-gray-700">
+                          <SelectValue placeholder="Select Section" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 text-white border-gray-700">
+                          {sections.map((section) => (
+                            <SelectItem key={section._id} value={section._id}>
+                              {section.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -197,4 +232,3 @@ export default function AddUser() {
     </div>
   )
 }
-

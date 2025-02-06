@@ -6,31 +6,32 @@ import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ToastContainer } from "react-toastify";
-import axios from "axios";
-import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { ToastContainer } from "react-toastify"
+import axios from "axios"
+import { showErrorToast, showSuccessToast } from "@/lib/utils"
 import { XAxis, CartesianGrid, Area, AreaChart, ResponsiveContainer } from "recharts"
 import { ArrowUp, AlertCircle, CheckCircle2, Clock } from "lucide-react"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 export default function AdminDashboard() {
-
   const [dashboardData, setDashboardData] = useState({})
-  const [dataChanged, setDataChanged] = useState(false);
+  const [dataChanged, setDataChanged] = useState(false)
+  const [selectedWorker, setSelectedWorker] = useState("")
+  const [selectedSection, setSelectedSection] = useState("")
 
   useEffect(() => {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/dashboard`);
-        const dashboardData = response.data.data;
-        setDashboardData(dashboardData);
+        const response = await axios.get(`${apiBaseUrl}/admin/dashboard`)
+        const dashboardData = response.data.data
+        setDashboardData(dashboardData)
       } catch (error) {
-        console.error("Error fetching orders:", error);
-        showErrorToast(`Error fetching orders ${error}`);
+        console.error("Error fetching orders:", error)
+        showErrorToast(`Error fetching orders ${error}`)
       }
-    };
-    fetchData();
+    }
+    fetchData()
   }, [dataChanged])
 
   const chartConfig = {
@@ -40,22 +41,35 @@ export default function AdminDashboard() {
     },
   }
 
+  async function assignWorkerToSection() {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+
+    try {
+      await axios.put(`${apiBaseUrl}/admin/user/${selectedWorker}/assign/${selectedSection}`)
+      showSuccessToast("Worker assigned to section successfully")
+      setDataChanged(true)
+    } catch (error) {
+      console.error("Error assigning worker to section:", error)
+      showErrorToast(`Error assigning worker to section: ${error}`)
+    }
+  }
+
   const generateReport = () => {
     console.log("Report Generated")
   }
 
   const resolveFlaggedPiece = async (pieceId) => {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
     try {
-      await axios.put(`${apiBaseUrl}/admin/piece/flagged/${pieceId}/resolved`);
+      await axios.put(`${apiBaseUrl}/admin/piece/flagged/${pieceId}/resolved`)
       showSuccessToast("Piece resolved Successfully")
     } catch (error) {
-      console.error("Error resolving piece", error);
-      showErrorToast(`Error resolving piece ${error}`);
+      console.error("Error resolving piece", error)
+      showErrorToast(`Error resolving piece ${error}`)
     }
 
-    setDataChanged(true);
+    setDataChanged(true)
   }
 
   const cardStyle = "bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white"
@@ -162,15 +176,16 @@ export default function AdminDashboard() {
             <CardTitle className="text-gray-50">Sections Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            {dashboardData?.sections?.length > 0 && dashboardData.sections.map((section) => (
-              <div key={section._id} className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-300">{section.name}</span>
-                  <span className="text-sm font-medium text-gray-50">{section.pieceCount} pieces</span>
+            {dashboardData?.sections?.length > 0 &&
+              dashboardData.sections.map((section) => (
+                <div key={section._id} className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-300">{section.name}</span>
+                    <span className="text-sm font-medium text-gray-50">{section.pieceCount} pieces</span>
+                  </div>
+                  <Progress value={(section.pieceCount / section.totalPieces) * 100} className="h-2 bg-gray-600" />
                 </div>
-                <Progress value={(section.pieceCount / section.totalPieces) * 100} className="h-2 bg-gray-600" />
-              </div>
-            ))}
+              ))}
           </CardContent>
         </Card>
       </div>
@@ -194,39 +209,39 @@ export default function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dashboardData?.orders?.length > 0 && dashboardData.orders.map((order) => (
-                  <TableRow key={order._id}>
-                    <TableCell className="text-gray-50">{order._id}</TableCell>
-                    <TableCell className="text-gray-50">{order.projectName}</TableCell>
-                    <TableCell className="text-gray-50">{order.customerName}</TableCell>
-                    <TableCell className="text-gray-50">{new Date(order.dueDate).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === "Completed"
-                          ? "bg-green-700 text-green-100"
-                          : order.status === "InProgress"
-                            ? "bg-blue-700 text-blue-100"
-                            : order.status === "Pending"
-                              ? "bg-yellow-700 text-yellow-100"
-                              : "bg-red-700 text-red-100"
-                          }`}
-                      >
-                        {order.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm" className="bg-white text-black hover:bg-gray-200">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {dashboardData?.orders?.length > 0 &&
+                  dashboardData.orders.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell className="text-gray-50">{order._id}</TableCell>
+                      <TableCell className="text-gray-50">{order.projectName}</TableCell>
+                      <TableCell className="text-gray-50">{order.customerName}</TableCell>
+                      <TableCell className="text-gray-50">{new Date(order.dueDate).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === "Completed"
+                              ? "bg-green-700 text-green-100"
+                              : order.status === "InProgress"
+                                ? "bg-blue-700 text-blue-100"
+                                : order.status === "Pending"
+                                  ? "bg-yellow-700 text-yellow-100"
+                                  : "bg-red-700 text-red-100"
+                            }`}
+                        >
+                          {order.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" className="bg-white text-black hover:bg-gray-200">
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
       </div>
-
 
       {/* Action Center */}
       <Card className={cardStyle}>
@@ -241,62 +256,69 @@ export default function AdminDashboard() {
                 <p className="text-gray-300">No flagged pieces to resolve.</p>
               ) : (
                 <div className="space-y-4">
-                  {dashboardData?.flaggedPieces?.length > 0 && dashboardData.flaggedPieces.map((piece, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg shadow">
-                      <div>
-                        <p className="font-medium text-gray-50">Piece ID: {piece._id}</p>
-                        <p className="text-sm text-gray-300">Issue: {piece.issue}</p>
-                        <p className="text-sm text-gray-300">Worker: {piece.worker}</p>
+                  {dashboardData?.flaggedPieces?.length > 0 &&
+                    dashboardData.flaggedPieces.map((piece, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg shadow">
+                        <div>
+                          <p className="font-medium text-gray-50">Section: {piece.currentSectionId.name}</p>
+                          <p className="text-sm text-gray-300">Worker: {piece.history[piece.history.length - 1].workerId?.fullName}</p>
+                          <img
+                            src={piece.history[piece.history.length - 1].photoUrl || "/placeholder.svg"}
+                            className="w-24 h-24 mt-2 object-cover rounded-md cursor-pointer"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          className="bg-white text-black hover:bg-gray-200"
+                          onClick={() => {
+                            setDataChanged(false)
+                            resolveFlaggedPiece(piece._id)
+                          }}
+                        >
+                          Resolve
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        className="bg-white text-black hover:bg-gray-200"
-                        onClick={() => {
-                          setDataChanged(false);
-                          resolveFlaggedPiece(piece._id)
-                        }}
-                      >
-                        Resolve
-                      </Button>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               )}
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-50">Assign Workers to Sections</h4>
               <div className="space-y-4">
-                <Select className="bg-gray-700 text-white">
+                <Select className="bg-gray-700 text-white" onValueChange={setSelectedWorker}>
                   <SelectTrigger className="bg-gray-700">
                     <SelectValue placeholder="Select Worker" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    {dashboardData?.workers?.length > 0 && dashboardData.workers.map((worker) => (
-                      <SelectItem key={worker.fullName} value={worker.fullName} className="text-white hover:text-white"
-                      >
-                        {worker.fullName}
-                      </SelectItem>
-                    ))}
+                    {dashboardData?.workers?.length > 0 &&
+                      dashboardData.workers.map((worker) => (
+                        <SelectItem key={worker._id} value={worker._id} className="text-white hover:text-white">
+                          {worker.fullName}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
-                <Select className="bg-gray-700 text-white">
+                <Select className="bg-gray-700 text-white" onValueChange={setSelectedSection}>
                   <SelectTrigger className="bg-gray-700 text-white">
                     <SelectValue placeholder="Select Section" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
-                    {dashboardData?.sections?.length > 0 && dashboardData.sections.map((section) => (
-                      <SelectItem
-                        key={section._id}
-                        value={section._id}
-                        className="text-white hover:text-white"
-                      >
-                        {section.name}
-                      </SelectItem>
-                    ))}
+                    {dashboardData?.sections?.length > 0 &&
+                      dashboardData.sections.map((section) => (
+                        <SelectItem key={section._id} value={section._id} className="text-white hover:text-white">
+                          {section.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
 
-                <Button className="w-full bg-white text-black hover:bg-gray-200">Assign</Button>
+                <Button
+                  onClick={assignWorkerToSection}
+                  className="w-full bg-white text-black hover:bg-gray-200"
+                  disabled={!selectedWorker || !selectedSection}
+                >
+                  Assign
+                </Button>
               </div>
             </div>
           </div>
