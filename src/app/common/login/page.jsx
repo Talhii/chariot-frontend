@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToastContainer } from "react-toastify";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp"
 
 import {
   InputOTP,
@@ -18,9 +17,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/utils";
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState("");
   const router = useRouter();
-
   const [accessCode, setAccessCode] = useState("");
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -74,18 +71,12 @@ export default function Login() {
       style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
     >
       <div className="layout-container flex h-full grow flex-col">
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-700 px-10 py-3">
-          <div className="flex items-center gap-4 text-white">
-
-          </div>
-        </header>
-
 
         <div className="px-4 md:px-40 flex flex-1 justify-center py-5">
           <Card className="w-full max-w-[512px] bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
             <CardHeader>
               <div className="w-full h-16">
-                <img src="logo.jpg" alt="Logo" className="w-[150px] h-auto object-cover mb-4 mx-auto" />
+                <img src="/logo.jpg" alt="Logo" className="w-[150px] h-auto object-cover mb-4 mx-auto" />
               </div>
               <CardTitle className="text-2xl font-bold text-center text-white">Welcome to Chariot</CardTitle>
               <p className="text-gray-300 text-center mt-2">Please select your role and enter your credentials</p>

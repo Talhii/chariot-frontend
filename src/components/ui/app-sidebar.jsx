@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Users, FileText, Settings, User, Layers, Menu, LogOut } from 'lucide-react'
+import { Home, Users, FileText, Settings, User, Layers, LogOut } from 'lucide-react'
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import axios from 'axios'
@@ -17,7 +17,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  useSidebar,
 } from "@/components/ui/sidebar"
 
 const sidebarItems = [
@@ -30,31 +29,30 @@ const sidebarItems = [
 ]
 
 export function AppSidebar({ className, ...props }) {
-  const { isMobile, openMobile, setOpenMobile } = useSidebar()
   const router = useRouter();
 
   const [user, setUser] = useState(null)
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const fetctUser = async () => {
+      const token = localStorage.getItem('token')
 
-    if (token) {
-      const decodedToken = jwtDecode(token)
-      const userId = decodedToken.user.id
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
-      axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      })
-        .then((response) => {
-          setUser(response.data.data)
+      if (token) {
+        const decodedToken = jwtDecode(token)
+        const userId = decodedToken.user.id
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+        const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
         })
-        .catch((error) => {
-          console.error("Error fetching user data:", error)
-        })
-    } else {
-      router.push("/");
+
+        setUser(response.data.data)
+      } else {
+        router.push("/");
+      }
     }
+
+    fetctUser()
   }, [])
 
   const handleLogout = () => {

@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
-import { toast, ToastContainer } from "react-toastify"; // Import toastify
+import { toast } from "react-toastify"; // Import toastify
 import "react-toastify/dist/ReactToastify.css"; // Import styles for toast
 
 export function cn(...inputs) {

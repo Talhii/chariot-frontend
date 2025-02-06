@@ -1,205 +1,226 @@
-"use client";
-import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+"use client"
 
-const roles = ["Admin", "Manager", "Worker"];
+import { useState, useEffect, use } from "react"
+import { useRouter } from "next/navigation"
+import axios from "axios"
+import { ToastContainer } from "react-toastify"
+import { showErrorToast, showSuccessToast } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Loader2, User } from "lucide-react"
+
+const roles = ["Admin", "Manager", "Worker"]
 
 export default function EditUser({ params }) {
-  const userId = use(params)?.id;
-
-  const router = useRouter();
-  const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [accessCode, setAccessCode] = useState("");
-  const [image, setImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const userId = use(params)?.id
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    fullName: "",
+    role: "",
+    username: "",
+    password: "",
+    accessCode: "",
+  })
+  const [image, setImage] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+        const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`)
+        const user = response.data.data
+
+        setFormData({
+          fullName: user.fullName || "",
+          role: user.role || "",
+          username: user.username || "",
+          password: "",
+          accessCode: user.accessCode || "",
+        })
+        setImage(user.profileImage || null)
+      } catch (error) {
+        console.error("Error fetching user:", error)
+        showErrorToast("Error fetching user data.")
+      }
+    }
+
     if (userId) {
-      const fetchUser = async () => {
-        try {
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-          const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`);
-          const user = response.data.data;
-
-          setFullName(user.fullName || "");
-          setRole(user.role || "");
-          setUsername(user.username || "");
-          setAccessCode(user.accessCode || "");
-          setImage(user.profileImage || null);
-        } catch (err) {
-          console.error("Error fetching user:", err);
-          setError("Error fetching user data.");
-        }
-      };
-
-      fetchUser();
+      fetchUser()
     }
-  }, [userId]);
+  }, [userId])
 
-  const handleFullNameChange = (e) => setFullName(e.target.value);
-  const handleRoleChange = (e) => setRole(e.target.value);
-  const handleUsernameChange = (e) => setUsername(e.target.value);
-  const handlePasswordChange = (e) => setPassword(e.target.value);
-  const handleAccessCodeChange = (e) => setAccessCode(e.target.value);
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0]
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setImage(URL.createObjectURL(file))
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+    e.preventDefault()
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
     const updatedUser = {
-      fullName,
-      role,
-      username: role === "Worker" ? undefined : username,
-      password: password ? password : undefined,
-      accessCode: role === "Worker" ? accessCode : undefined,
-      file: image ? image : undefined,
-    };
+      fullName: formData.fullName,
+      role: formData.role,
+      username: formData.role === "Worker" ? undefined : formData.username,
+      password: formData.password ? formData.password : undefined,
+      accessCode: formData.role === "Worker" ? formData.accessCode : undefined,
+    }
 
-    const formData = new FormData();
-    Object.keys(updatedUser).forEach((key) => {
-      if (updatedUser[key]) {
-        if (key === "file" && image) {
-          formData.append(key, e.target.image.files[0]);
-        } else {
-          formData.append(key, updatedUser[key]);
-        }
-      }
-    });
+    const formDataToSend = new FormData()
+    Object.entries(updatedUser).forEach(([key, value]) => {
+      if (value) formDataToSend.append(key, value)
+    })
+
+    if (image) {
+      const imageFile = await fetch(image).then((res) => res.blob())
+      formDataToSend.append("file", imageFile, "profile.jpg")
+    }
 
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await axios.put(`${apiBaseUrl}/admin/user/${userId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      console.log("User Updated Successfully:", response.data);
-      router.push("/admin/user");
-    } catch (err) {
-      console.error("Error updating user:", err);
-      setError(err.response?.data?.message || "An error occurred while updating the user.");
+      setIsLoading(true)
+      await axios.put(`${apiBaseUrl}/admin/user/${userId}`, formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      showSuccessToast("User Updated Successfully")
+      router.push("/admin/user")
+    } catch (error) {
+      console.error("Error updating user:", error)
+      showErrorToast(`Error updating user: ${error}`)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="bg-gradient-to-br from-gray-950 to-black flex h-screen w-full bg-gray-900 text-white">
-      <div className="p-8 w-full">
-        <h2 className="text-3xl font-semibold text-white mb-8">Edit User</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-lg text-gray-400 mb-2">Full Name</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={handleFullNameChange}
-              placeholder="e.g., John Doe"
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-              required
-            />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-8">
+      <h2 className="text-3xl font-semibold mb-8">Edit User</h2>
+      <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white">User Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex-1 space-y-6">
+                <div className="text-white space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) => handleChange("fullName", e.target.value)}
+                    placeholder="e.g., John Doe"
+                    className="bg-gray-800 text-white border-gray-700"
+                    required
+                  />
+                </div>
 
-          <div>
-            <label className="block text-lg text-gray-400 mb-2">Role</label>
-            <select
-              value={role}
-              onChange={handleRoleChange}
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-              required
-            >
-              <option value="">Select Role</option>
-              {roles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div className="text-white space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Select value={formData.role} onValueChange={(value) => handleChange("role", value)}>
+                    <SelectTrigger className="bg-gray-800 text-white border-gray-700">
+                      <SelectValue placeholder="Select Role" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 text-white border-gray-700">
+                      {roles.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {(role === "Admin" || role === "Manager") && (
-            <div>
-              <label className="block text-lg text-gray-400 mb-2">Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={handleUsernameChange}
-                placeholder="e.g., johndoe"
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-              />
-            </div>
-          )}
+                {(formData.role === "Admin" || formData.role === "Manager") && (
+                  <>
+                    <div className="text-white space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        value={formData.username}
+                        onChange={(e) => handleChange("username", e.target.value)}
+                        placeholder="e.g., johndoe"
+                        className="bg-gray-800 text-white border-gray-700"
+                        required
+                      />
+                    </div>
 
-          {(role === "Admin" || role === "Manager") && (
-            <div>
-              <label className="block text-lg text-gray-400 mb-2">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                placeholder="Leave blank to keep current password"
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-              />
-            </div>
-          )}
+                    <div className="text-white space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => handleChange("password", e.target.value)}
+                        placeholder="Leave blank to keep current password"
+                        className="bg-gray-800 text-white border-gray-700"
+                      />
+                    </div>
+                  </>
+                )}
 
-          {role === "Worker" && (
-            <div>
-              <label className="block text-lg text-gray-400 mb-2">Access Code</label>
-              <input
-                type="text"
-                value={accessCode}
-                onChange={handleAccessCodeChange}
-                placeholder="Access Code"
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-                required
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-lg text-gray-400 mb-2">Profile Image</label>
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-md"
-            />
-            {image && (
-              <div className="mt-4">
-                <img src={image} alt="Image Preview" className="w-24 h-24 object-cover rounded-md" />
+                {formData.role === "Worker" && (
+                  <div className="text-white space-y-2">
+                    <Label htmlFor="accessCode">Access Code</Label>
+                    <Input
+                      id="accessCode"
+                      value={formData.accessCode}
+                      onChange={(e) => handleChange("accessCode", e.target.value)}
+                      placeholder="Access Code"
+                      className="bg-gray-800 text-white border-gray-700"
+                      required
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {error && <div className="text-red-500 text-sm">{error}</div>}
+              <div className="flex-1 space-y-6">
+                <div className="text-white space-y-2">
+                  <Label htmlFor="image">Profile Image</Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="bg-gray-800 text-white border-gray-700"
+                  />
+                </div>
 
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className={`px-6 py-3 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isLoading}
-            >
-              {isLoading ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </form>
-      </div>
+                <div className="flex justify-center">
+                  <Avatar className="w-40 h-40">
+                    <AvatarImage src={image || undefined} alt="Profile Preview" />
+                    <AvatarFallback className="bg-gray-600">
+                      <User className="w-20 h-20 text-gray-400" />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <ToastContainer />
     </div>
-  );
-};
+  )
+}
+

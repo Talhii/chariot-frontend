@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToastContainer } from "react-toastify";
 import axios from "axios";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Area, AreaChart, Tooltip, ResponsiveContainer } from "recharts"
-import { ArrowUp, ArrowDown, AlertCircle, CheckCircle2, Clock } from "lucide-react"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { XAxis, CartesianGrid, Area, AreaChart, ResponsiveContainer } from "recharts"
+import { ArrowUp, AlertCircle, CheckCircle2, Clock } from "lucide-react"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 export default function AdminDashboard() {
 

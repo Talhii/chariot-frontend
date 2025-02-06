@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const [expandedOrderId, setExpandedOrderId] = useState(null)
   const [enlargedImage, setEnlargedImage] = useState(null)
   const [isScanning, setIsScanning] = useState(false)
-  const [scannedData, setScannedData] = useState("")
+  const [scannedData, setScannedData] = useState(null)
   const [isSectionOneUser, setIsSectionOneUser] = useState(false);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function DashboardPage() {
     }
 
     fetchUser()
-  }, [router]) // Added router to dependencies
+  }, [router]) 
 
   useEffect(() => {
     async function fetchOrders() {
@@ -114,8 +114,26 @@ export default function DashboardPage() {
   }, [isScanning])
 
   useEffect(() => {
+    async function fetchPieceandCompareSection() {
+      const token = localStorage.getItem("token")
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+      const response = await axios.get(`${apiBaseUrl}/worker/piece/${scannedData}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const piece = response.data.data;
+
+      if (piece.currentSectionId.number == user?.section.number) {
+        handleOpenSubmitModal(null, scannedData)
+      }
+      else {
+        showErrorToast("Piece does not belong to this section")
+      }
+    }
+
     if (scannedData) {
-      handleOpenSubmitModal(null, scannedData)
+      fetchPieceandCompareSection();
     }
   }, [scannedData])
 
@@ -276,7 +294,7 @@ export default function DashboardPage() {
     )
   }
 
-  function OrdersTable({ Orders, User, onOpenSubmitModal, onOpenViewPieceModal, expandedOrderId, setExpandedOrderId }) {
+  function OrdersTable({ Orders, onOpenSubmitModal, onOpenViewPieceModal, expandedOrderId, setExpandedOrderId }) {
     const [currentTab, setCurrentTab] = useState("Current")
 
     const handleAddPieceClick = (orderId) => {
@@ -452,7 +470,6 @@ export default function DashboardPage() {
 
         setSelectedImage(null)
         setCheckedStates({})
-
         setPiecesChange(true)
         onClose()
       } catch (error) {
@@ -537,7 +554,6 @@ export default function DashboardPage() {
       })
 
       showSuccessToast("Piece Flagged Successfully")
-
       setPiecesChange(true)
       onClose()
     }
@@ -587,7 +603,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </div>   
     )
   }
 
@@ -681,26 +697,26 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          {/* {!isSectionOneUser && (
+          {!isSectionOneUser && (
             <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 mb-8">
               <CardHeader>
                 <CardTitle className="text-white">QR Code Scanner</CardTitle>
               </CardHeader>
               <CardContent>
                 <div id="qr-reader" className="w-64 h-64 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div>
-                {scannedData && <p className="text-center mb-4 text-white">Scanned Piece Successfully</p>}
                 <Button
                   className="w-full bg-white text-black hover:bg-gray-200 hover:text-black"
-                  onClick={() => setIsScanning(!isScanning)}
+                  onClick={() => {
+                    setScannedData(null);
+                    setIsScanning(!isScanning)
+                  }}
                 >
                   {isScanning ? "Stop Scanning" : "Start Scanning"}
                 </Button>
               </CardContent>
             </Card>
-          )} */}
-
+          )}
         </div>
-
 
         <OrdersTable
           Orders={orders}
@@ -728,4 +744,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-

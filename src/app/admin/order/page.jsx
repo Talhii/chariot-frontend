@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 

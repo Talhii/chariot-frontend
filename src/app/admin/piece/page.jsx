@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
@@ -66,13 +65,6 @@ export default function Pieces() {
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-3xl font-semibold text-white">Pieces</h2>
-                <button
-                    onClick={handleAddPieceClick}
-                    className="flex items-center px-6 py-3 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
-                >
-                    <Plus className="mr-2" />
-                    Add Piece
-                </button>
             </div>
 
             <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
