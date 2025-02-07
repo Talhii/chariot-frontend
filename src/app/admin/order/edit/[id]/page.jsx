@@ -19,6 +19,7 @@ export default function EditOrder({ params }) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
   const router = useRouter()
   const orderId = use(params)?.id
+  const token = localStorage.getItem('token');
 
   const [formData, setFormData] = useState({
     projectName: "",
@@ -32,7 +33,11 @@ export default function EditOrder({ params }) {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/order/${orderId}`)
+        const response = await axios.get(`${apiBaseUrl}/admin/order/${orderId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         const order = response.data.data
 
         setFormData({
@@ -75,7 +80,7 @@ export default function EditOrder({ params }) {
 
     try {
       await axios.put(`${apiBaseUrl}/admin/order/${orderId}`, uploadData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       })
       showSuccessToast("Order Updated Successfully")
       router.push("/admin/order")

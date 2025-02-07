@@ -16,7 +16,7 @@ const AdminLayout = ({ children }) => {
         if (token) {
             try {
                 const decodedToken = jwt.decode(token);
-                if (decodedToken && decodedToken.user.role == "Admin") {
+                if (decodedToken && (decodedToken.user.role == "Admin" || decodedToken.user.role == "Manager")) {
                     setIsAuthenticated(true);
                 } else {
                     router.push("/");

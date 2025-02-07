@@ -44,7 +44,7 @@ export default function DashboardPage() {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
         const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
         })
         const userData = response.data.data;
@@ -56,7 +56,7 @@ export default function DashboardPage() {
     }
 
     fetchUser()
-  }, [router]) 
+  }, [router])
 
   useEffect(() => {
     async function fetchOrders() {
@@ -64,7 +64,7 @@ export default function DashboardPage() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
       const response = await axios.get(`${apiBaseUrl}/worker/order?sectionNumber=${user?.section.number}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
       })
 
@@ -119,7 +119,7 @@ export default function DashboardPage() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
       const response = await axios.get(`${apiBaseUrl}/worker/piece/${scannedData}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
       })
       const piece = response.data.data;
@@ -461,7 +461,7 @@ export default function DashboardPage() {
           : `${apiBaseUrl}/worker/piece?pieceId=${selectedPieceId}`
         const response = await axios.post(url, formData, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         })
@@ -548,7 +548,7 @@ export default function DashboardPage() {
 
       const response = await axios.post(`${apiBaseUrl}/worker/piece/flag/${piece._id}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       })
@@ -603,7 +603,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>   
+      </div>
     )
   }
 
@@ -668,42 +668,51 @@ export default function DashboardPage() {
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700">
+
+          {/* First Card - Assigned Section with reduced height */}
+          <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700 h-70 sm:h-72 lg:h-74"> {/* Reduced height */}
             <CardHeader>
               <CardTitle className="text-white">Assigned Section</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold text-white">{user?.section?.name}</p>
+              <p className="text-xl font-semibold text-white">{user?.section?.name}</p>
               <Badge className="mt-2 bg-blue-500 bg-opacity-50 text-white">InProgress</Badge>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{orders?.length}</div>
-            </CardContent>
-          </Card>
-          {!isSectionOneUser && (
+          {/* Total Orders and Total Current Pieces Cards */}
+          <div className="lg:flex lg:flex-col lg:space-y-6 sm:flex sm:flex-col sm:space-y-6 gap-0 mb-8">
+            {/* Total Orders Card */}
             <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Current Pieces</CardTitle>
+                <CardTitle className="text-sm font-bold">Total Orders</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{piecesCount}</div>
+              <CardContent className="py-6">
+                <div className="text-2xl font-bold">{orders?.length}</div>
               </CardContent>
             </Card>
-          )}
 
+            {/* Total Current Pieces Card */}
+            {!isSectionOneUser && (
+              <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-bold">Total Current Pieces</CardTitle>
+                </CardHeader>
+                <CardContent className="py-6">
+                  <div className="text-2xl font-bold">{piecesCount}</div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* QR Code Card with reduced height */}
           {!isSectionOneUser && (
-            <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 mb-8">
+            <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 mb-8 h-70 sm:h-72 lg:h-74 flex flex-col justify-between"> {/* Flex added for vertical alignment */}
               <CardHeader>
                 <CardTitle className="text-white">QR Code Scanner</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div id="qr-reader" className="w-64 h-64 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div>
+              <CardContent className="flex flex-col justify-center items-center"> {/* Flex added for centering */}
+                <div id="qr-reader" className="w-32 h-32 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div> {/* Adjusted height */}
                 <Button
                   className="w-full bg-white text-black hover:bg-gray-200 hover:text-black"
                   onClick={() => {
@@ -717,6 +726,8 @@ export default function DashboardPage() {
             </Card>
           )}
         </div>
+
+
 
         <OrdersTable
           Orders={orders}

@@ -23,12 +23,17 @@ export default function EditPiece({ params }) {
     status: "InProgress",
     history: [],
   })
+  const token = localStorage.getItem('token');
   const router = useRouter()
 
   useEffect(() => {
     const fetchPieceData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/piece/${pieceId}`)
+        const response = await axios.get(`${apiBaseUrl}/admin/piece/${pieceId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setFormData(response.data.data)
       } catch (error) {
         console.error("Error fetching piece data:", error)
@@ -38,7 +43,11 @@ export default function EditPiece({ params }) {
 
     const fetchSections = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/section`)
+        const response = await axios.get(`${apiBaseUrl}/admin/section`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setSections(response.data.data)
       } catch (error) {
         console.error("Error fetching sections:", error)
@@ -59,7 +68,11 @@ export default function EditPiece({ params }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await axios.put(`${apiBaseUrl}/admin/piece/${pieceId}`, formData)
+      await axios.put(`${apiBaseUrl}/admin/piece/${pieceId}`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       showSuccessToast("Piece Updated Successfully")
       router.push("/admin/piece")
     } catch (error) {

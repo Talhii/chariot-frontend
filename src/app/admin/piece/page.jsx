@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import jwt from 'jsonwebtoken';
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function Pieces() {
@@ -13,10 +14,17 @@ export default function Pieces() {
     const [pieceToDelete, setPieceToDelete] = useState(null);
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
+    const token = localStorage.getItem('token');
+    const decodedToken = jwt.decode(token);
+
     useEffect(() => {
         const fetchPieces = async () => {
             try {
-                const response = await axios.get(`${apiBaseUrl}/admin/piece`);
+                const response = await axios.get(`${apiBaseUrl}/admin/piece`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const pieces = await response.data.data;
                 setPieces(pieces);
             } catch (error) {
@@ -43,7 +51,11 @@ export default function Pieces() {
 
     const deletePiece = async () => {
         try {
-            const response = await axios.delete(`${apiBaseUrl}/admin/piece/${pieceToDelete._id}`);
+            const response = await axios.delete(`${apiBaseUrl}/admin/piece/${pieceToDelete._id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (response.status === 200) {
                 showSuccessToast("Piece deleted successfully");
             } else {
@@ -74,7 +86,7 @@ export default function Pieces() {
                             <th className="px-8 py-4">Piece Number</th>
                             <th className="px-8 py-4">Current Section</th>
                             <th className="px-8 py-4">Status</th>
-                            <th className="px-8 py-4">Actions</th>
+                            {decodedToken?.user.role == "Admin" && <th className="px-8 py-4">Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -96,10 +108,12 @@ export default function Pieces() {
                                         {piece.status}
                                     </span>
                                 </td>
-                                <td className="flex justify-content px-4 py-4">
-                                    <button onClick={() => { handleEditPieceClick(piece._id); }} className="text-blue-400 hover:text-blue-600 text-lg" >Edit</button>
-                                    <button onClick={() => handleDeletePieceClick(piece)} className="ml-6 text-red-400 hover:text-red-600 text-lg">Delete</button>
-                                </td>
+                                {decodedToken?.user.role == "Admin" &&
+                                    <td className="flex justify-content px-4 py-4">
+                                        <button onClick={() => { handleEditPieceClick(piece._id); }} className="text-blue-400 hover:text-blue-600 text-lg" >Edit</button>
+                                        <button onClick={() => handleDeletePieceClick(piece)} className="ml-6 text-red-400 hover:text-red-600 text-lg">Delete</button>
+                                    </td>
+                                }
                             </tr>
                         ))}
                     </tbody>

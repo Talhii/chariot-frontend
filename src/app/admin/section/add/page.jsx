@@ -22,6 +22,7 @@ export default function AddSection() {
   const [checklist, setChecklist] = useState([])
   const [newTaskDescription, setNewTaskDescription] = useState("")
   const [isMandatory, setIsMandatory] = useState(false)
+  const token = localStorage.getItem('token');
 
   const handleSectionNumberChange = (e) => {
     setSectionNumber(Number(e.target.value))
@@ -65,7 +66,11 @@ export default function AddSection() {
         number: sectionNumber,
         name: sectionName,
         checklist: checklist,
-      })
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       showSuccessToast("Section created successfully")
       router.push("/admin/section")
     } catch (error) {

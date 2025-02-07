@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import jwt from 'jsonwebtoken';
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 
@@ -15,10 +16,17 @@ export default function Orders() {
   const [orderToDelete, setOrderToDelete] = useState(null);
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  const token = localStorage.getItem('token');
+  const decodedToken = jwt.decode(token);
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/order`);
+        const response = await axios.get(`${apiBaseUrl}/admin/order`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         const orders = response.data.data;
         setOrders(orders);
       } catch (error) {
@@ -44,7 +52,11 @@ export default function Orders() {
 
   const deleteOrder = async () => {
     try {
-      const response = await axios.delete(`${apiBaseUrl}/admin/order/${orderToDelete._id}`);
+      const response = await axios.delete(`${apiBaseUrl}/admin/order/${orderToDelete._id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.status === 200) {
         showSuccessToast("Order Deleted Successfully")
       } else {
@@ -66,13 +78,15 @@ export default function Orders() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-semibold text-white">Orders</h2>
-        <button
-          onClick={handleAddOrderClick}
-          className="flex items-center px-6 py-3 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
-        >
-          <Plus className="mr-2" />
-          Add Order
-        </button>
+        {decodedToken?.user.role == "Admin" &&
+          <button
+            onClick={handleAddOrderClick}
+            className="flex items-center px-6 py-3 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
+          >
+            <Plus className="mr-2" />
+            Add Order
+          </button>
+        }
       </div>
 
       <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
@@ -83,7 +97,7 @@ export default function Orders() {
               <th className="px-8 py-4">Customer</th>
               <th className="px-8 py-4">Due Date</th>
               <th className="px-8 py-4">Status</th>
-              <th className="px-8 py-4">Actions</th>
+              {decodedToken?.user.role == "Admin" && <th className="px-8 py-4">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -104,15 +118,17 @@ export default function Orders() {
                     {order.status}
                   </span>
                 </td>
-                <td className="flex justify-content px-4 py-4">
-                  <button onClick={() => { handleEditOrderClick(order._id); }} className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
-                  <button
-                    onClick={() => handleDeleteOrderClick(order)}
-                    className="ml-6 text-red-400 hover:text-red-600 text-lg"
-                  >
-                    Delete
-                  </button>
-                </td>
+                {decodedToken?.user.role == "Admin" &&
+                  <td className="flex justify-content px-4 py-4">
+                    <button onClick={() => { handleEditOrderClick(order._id); }} className="text-blue-400 hover:text-blue-600 text-lg">Edit</button>
+                    <button
+                      onClick={() => handleDeleteOrderClick(order)}
+                      className="ml-6 text-red-400 hover:text-red-600 text-lg"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                }
               </tr>
             ))}
           </tbody>
@@ -141,7 +157,7 @@ export default function Orders() {
           </div>
         </div>
       )}
-      
+
       <ToastContainer />
     </div>
   );

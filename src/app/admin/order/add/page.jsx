@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 export default function AddOrder() {
+  const token = localStorage.getItem('token');
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
   const router = useRouter()
 
@@ -48,7 +49,7 @@ export default function AddOrder() {
 
     try {
       await axios.post(`${apiBaseUrl}/admin/order`, uploadData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       })
       showSuccessToast("Order Created Successfully")
       router.push("/admin/order")

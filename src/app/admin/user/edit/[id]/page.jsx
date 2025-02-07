@@ -29,12 +29,17 @@ export default function EditUser({ params }) {
   const [image, setImage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sections, setSections] = useState([])
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`)
+        const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const user = response.data.data
 
         setFormData({
@@ -54,7 +59,11 @@ export default function EditUser({ params }) {
 
     const fetchSections = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/section`)
+        const response = await axios.get(`${apiBaseUrl}/admin/section`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setSections(response.data.data)
       } catch (error) {
         console.error("Error fetching sections:", error)
@@ -105,7 +114,7 @@ export default function EditUser({ params }) {
     try {
       setIsLoading(true)
       await axios.put(`${apiBaseUrl}/admin/user/${userId}`, formDataToSend, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       })
       showSuccessToast("User Updated Successfully")
       router.push("/admin/user")

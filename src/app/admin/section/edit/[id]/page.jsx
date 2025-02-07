@@ -24,12 +24,18 @@ export default function EditSection({ params }) {
   const [newTaskDescription, setNewTaskDescription] = useState("")
   const [isMandatory, setIsMandatory] = useState(false)
 
+  const token = localStorage.getItem('token');
+
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
     const fetchSectionData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/section/${sectionId}`)
+        const response = await axios.get(`${apiBaseUrl}/admin/section/${sectionId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const { number, name, checklist } = response.data.data
 
         setSectionData(response.data.data)
@@ -88,7 +94,11 @@ export default function EditSection({ params }) {
           description: task.description,
           isMandatory: task.isMandatory,
         })),
-      })
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       showSuccessToast("Section updated successfully")
       router.push("/admin/section")
     } catch (error) {

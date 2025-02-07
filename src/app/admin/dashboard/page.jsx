@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToastContainer } from "react-toastify"
 import axios from "axios"
+import jwt from "jsonwebtoken"
 import { showErrorToast, showSuccessToast } from "@/lib/utils"
 import { XAxis, CartesianGrid, Area, AreaChart, ResponsiveContainer } from "recharts"
 import { ArrowUp, AlertCircle, CheckCircle2, Clock } from "lucide-react"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import * as XLSX from "xlsx"
 
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState({})
@@ -19,11 +21,18 @@ export default function AdminDashboard() {
   const [selectedWorker, setSelectedWorker] = useState("")
   const [selectedSection, setSelectedSection] = useState("")
 
+  const token = localStorage.getItem("token")
+  const decodedToken = jwt.decode(token)
+
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/dashboard`)
+        const response = await axios.get(`${apiBaseUrl}/admin/dashboard`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         const dashboardData = response.data.data
         setDashboardData(dashboardData)
       } catch (error) {
@@ -45,7 +54,15 @@ export default function AdminDashboard() {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
     try {
-      await axios.put(`${apiBaseUrl}/admin/user/${selectedWorker}/assign/${selectedSection}`)
+      await axios.put(
+        `${apiBaseUrl}/admin/user/${selectedWorker}/assign/${selectedSection}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
       showSuccessToast("Worker assigned to section successfully")
       setDataChanged(true)
     } catch (error) {
@@ -55,14 +72,51 @@ export default function AdminDashboard() {
   }
 
   const generateReport = () => {
-    console.log("Report Generated")
+    // Prepare data for the Excel file
+    const data = [
+      ["Total Pieces", dashboardData?.counts?.pieceCount],
+      ["Flagged Pieces", dashboardData?.counts?.flaggedPiecesCount],
+      ["Completed Orders", dashboardData?.counts?.totalOrdersCount],
+      ["Pending Orders", dashboardData?.counts?.pendingOrdersCount],
+      [],
+      ["Recent Orders"],
+      ["Order ID", "Project Name", "Customer Name", "Due Date", "Status"],
+    ]
+
+    // Add order data
+    dashboardData?.orders?.forEach((order) => {
+      data.push([
+        order._id,
+        order.projectName,
+        order.customerName,
+        new Date(order.dueDate).toLocaleDateString(),
+        order.status,
+      ])
+    })
+
+    // Create a new workbook and add the data
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet(data)
+    XLSX.utils.book_append_sheet(wb, ws, "Report")
+
+    // Generate and download the Excel file
+    XLSX.writeFile(wb, "admin_report.xlsx")
+    showSuccessToast("Report generated successfully")
   }
 
   const resolveFlaggedPiece = async (pieceId) => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
     try {
-      await axios.put(`${apiBaseUrl}/admin/piece/${pieceId}/resolve`)
+      await axios.put(
+        `${apiBaseUrl}/admin/piece/${pieceId}/resolve`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
       showSuccessToast("Piece resolved Successfully")
     } catch (error) {
       console.error("Error resolving piece", error)
@@ -132,7 +186,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Chart and Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className={`lg:col-span-2 ${cardStyle}`}>
@@ -218,14 +272,15 @@ export default function AdminDashboard() {
                       <TableCell className="text-gray-50">{new Date(order.dueDate).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === "Completed"
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            order.status === "Completed"
                               ? "bg-green-700 text-green-100"
                               : order.status === "InProgress"
                                 ? "bg-blue-700 text-blue-100"
                                 : order.status === "Pending"
                                   ? "bg-yellow-700 text-yellow-100"
                                   : "bg-red-700 text-red-100"
-                            }`}
+                          }`}
                         >
                           {order.status}
                         </span>
@@ -244,86 +299,94 @@ export default function AdminDashboard() {
       </div>
 
       {/* Action Center */}
-      <Card className={cardStyle}>
-        <CardHeader>
-          <CardTitle className="text-gray-50">Action Center</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <h4 className="text-lg font-semibold mb-4 text-gray-50">Resolve Flagged Pieces</h4>
-              {!dashboardData?.flaggedPieces?.length > 0 ? (
-                <p className="text-gray-300">No flagged pieces to resolve.</p>
-              ) : (
-                <div className="space-y-4">
-                  {dashboardData?.flaggedPieces?.length > 0 &&
-                    dashboardData.flaggedPieces.map((piece, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg shadow">
-                        <div>
-                          <p className="font-medium text-gray-50">Section: {piece.currentSectionId.name}</p>
-                          <p className="text-sm text-gray-300">Worker: {piece.history[piece.history.length - 1].workerId?.fullName}</p>
-                          <img
-                            src={piece.history[piece.history.length - 1].photoUrl || "/placeholder.svg"}
-                            className="w-24 h-24 mt-2 object-cover rounded-md cursor-pointer"
-                          />
-                        </div>
-                        <Button
-                          variant="outline"
-                          className="bg-white text-black hover:bg-gray-200"
-                          onClick={() => {
-                            setDataChanged(false)
-                            resolveFlaggedPiece(piece._id)
-                          }}
-                        >
-                          Resolve
-                        </Button>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4 text-gray-50">Assign Workers to Sections</h4>
-              <div className="space-y-4">
-                <Select className="bg-gray-700 text-white" onValueChange={setSelectedWorker}>
-                  <SelectTrigger className="bg-gray-700">
-                    <SelectValue placeholder="Select Worker" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    {dashboardData?.workers?.length > 0 &&
-                      dashboardData.workers.map((worker) => (
-                        <SelectItem key={worker._id} value={worker._id} className="text-white hover:text-white">
-                          {worker.fullName}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <Select className="bg-gray-700 text-white" onValueChange={setSelectedSection}>
-                  <SelectTrigger className="bg-gray-700 text-white">
-                    <SelectValue placeholder="Select Section" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    {dashboardData?.sections?.length > 0 &&
-                      dashboardData.sections.map((section) => (
-                        <SelectItem key={section._id} value={section._id} className="text-white hover:text-white">
-                          {section.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
 
-                <Button
-                  onClick={assignWorkerToSection}
-                  className="w-full bg-white text-black hover:bg-gray-200"
-                  disabled={!selectedWorker || !selectedSection}
-                >
-                  Assign
-                </Button>
+      {decodedToken?.user.role == "Admin" && (
+        <Card className={cardStyle}>
+          <CardHeader>
+            <CardTitle className="text-gray-50">Action Center</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h4 className="text-lg font-semibold mb-4 text-gray-50">Resolve Flagged Pieces</h4>
+                {!dashboardData?.flaggedPieces?.length > 0 ? (
+                  <p className="text-gray-300">No flagged pieces to resolve.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {dashboardData?.flaggedPieces?.length > 0 &&
+                      dashboardData.flaggedPieces.map((piece, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-4 bg-gray-700 rounded-lg shadow"
+                        >
+                          <div>
+                            <p className="font-medium text-gray-50">Section: {piece.currentSectionId.name}</p>
+                            <p className="text-sm text-gray-300">
+                              Worker: {piece.history[piece.history.length - 1].workerId?.fullName}
+                            </p>
+                            <img
+                              src={piece.history[piece.history.length - 1].photoUrl || "/placeholder.svg"}
+                              className="w-24 h-24 mt-2 object-cover rounded-md cursor-pointer"
+                            />
+                          </div>
+                          <Button
+                            variant="outline"
+                            className="bg-white text-black hover:bg-gray-200"
+                            onClick={() => {
+                              setDataChanged(false)
+                              resolveFlaggedPiece(piece._id)
+                            }}
+                          >
+                            Resolve
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold mb-4 text-gray-50">Assign Workers to Sections</h4>
+                <div className="space-y-4">
+                  <Select className="bg-gray-700 text-white" onValueChange={setSelectedWorker}>
+                    <SelectTrigger className="bg-gray-700">
+                      <SelectValue placeholder="Select Worker" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      {dashboardData?.workers?.length > 0 &&
+                        dashboardData.workers.map((worker) => (
+                          <SelectItem key={worker._id} value={worker._id} className="text-white hover:text-white">
+                            {worker.fullName}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <Select className="bg-gray-700 text-white" onValueChange={setSelectedSection}>
+                    <SelectTrigger className="bg-gray-700 text-white">
+                      <SelectValue placeholder="Select Section" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      {dashboardData?.sections?.length > 0 &&
+                        dashboardData.sections.map((section) => (
+                          <SelectItem key={section._id} value={section._id} className="text-white hover:text-white">
+                            {section.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    onClick={assignWorkerToSection}
+                    className="w-full bg-white text-black hover:bg-gray-200"
+                    disabled={!selectedWorker || !selectedSection}
+                  >
+                    Assign
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
       <ToastContainer />
     </div>
   )

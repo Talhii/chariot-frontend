@@ -54,7 +54,7 @@ export default function Login() {
 
         if (response?.data?.success) {
           localStorage.setItem("token", response?.data?.token);
-          router.push(`/${selectedRole}/dashboard`)
+          router.push('/admin/dashboard')
         } else {
           setErrorMessage("Login failed. Please check your credentials.")
         }

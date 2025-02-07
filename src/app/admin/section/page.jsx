@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import jwt from 'jsonwebtoken';
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
 
 export default function Sections() {
@@ -14,10 +15,17 @@ export default function Sections() {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const router = useRouter();
 
+    const token = localStorage.getItem('token');
+    const decodedToken = jwt.decode(token);
+
     useEffect(() => {
         const fetchSections = async () => {
             try {
-                const response = await axios.get(`${apiBaseUrl}/admin/section`);
+                const response = await axios.get(`${apiBaseUrl}/admin/section`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const sectionsData = response.data.data;
                 if (sectionsData.length > 0) {
                     setSections(sectionsData);
@@ -46,7 +54,11 @@ export default function Sections() {
 
     const deleteSection = async () => {
         try {
-            const response = await axios.delete(`${apiBaseUrl}/admin/section/${sectionToDelete._id}`);
+            const response = await axios.delete(`${apiBaseUrl}/admin/section/${sectionToDelete._id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (response.status === 200 || response.status === 201) {
                 setIsModalOpen(false);
                 setSectionToDelete(null);
@@ -66,16 +78,17 @@ export default function Sections() {
     };
 
     return (
-        <div className="p-8">            
+        <div className="p-8">
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-semibold text-white">Sections</h2>
-                <button
-                    onClick={handleAddSectionClick}
-                    className="flex items-center px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
-                >
-                    <Plus className="mr-2" />
-                    Add Section
-                </button>
+                {decodedToken?.user.role == "Admin" &&
+                    <button
+                        onClick={handleAddSectionClick}
+                        className="flex items-center px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
+                    >
+                        <Plus className="mr-2" />
+                        Add Section
+                    </button>}
             </div>
 
             <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
@@ -85,7 +98,7 @@ export default function Sections() {
                             <th className="px-6 py-3">Section Number</th>
                             <th className="px-6 py-3">Section</th>
                             <th className="px-6 py-3">Checklist</th>
-                            <th className="px-6 py-3">Actions</th>
+                            {decodedToken?.user.role == "Admin" && <th className="px-6 py-3">Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -107,10 +120,12 @@ export default function Sections() {
                                         ))}
                                     </ul>
                                 </td>
-                                <td className="flex justify-content px-4 py-4">
-                                    <button onClick={() => { handleEditSectionClick(section._id); }} className="text-blue-400 hover:text-blue-600">Edit</button>
-                                    <button onClick={() => { handleDeleteSectionClick(section); }} className="ml-4 text-red-400 hover:text-red-600">Delete</button>
-                                </td>
+                                {decodedToken?.user.role == "Admin" &&
+                                    <td className="flex justify-content px-4 py-4">
+                                        <button onClick={() => { handleEditSectionClick(section._id); }} className="text-blue-400 hover:text-blue-600">Edit</button>
+                                        <button onClick={() => { handleDeleteSectionClick(section); }} className="ml-4 text-red-400 hover:text-red-600">Delete</button>
+                                    </td>
+                                }
                             </tr>
                         )) : (
                             <tr>

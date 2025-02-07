@@ -28,12 +28,17 @@ export default function AddUser() {
   const [image, setImage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sections, setSections] = useState([])
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
     const fetchSections = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/admin/section`)
+        const response = await axios.get(`${apiBaseUrl}/admin/section`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setSections(response.data.data)
       } catch (error) {
         console.error("Error fetching sections:", error)
@@ -81,7 +86,7 @@ export default function AddUser() {
     try {
       setIsLoading(true)
       await axios.post(`${apiBaseUrl}/admin/user`, formDataToSend, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       })
       showSuccessToast("User Created Successfully")
       router.push("/admin/user")
