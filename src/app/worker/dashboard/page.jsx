@@ -453,6 +453,7 @@ export default function DashboardPage() {
         const formData = new FormData()
         formData.append("file", selectedImage)
         formData.append("sectionNumber", sectionNumber)
+        formData.append("code", "UNIT #1-K-1")
 
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
@@ -460,10 +461,7 @@ export default function DashboardPage() {
           ? `${apiBaseUrl}/worker/piece?orderId=${selectedOrderId}`
           : `${apiBaseUrl}/worker/piece?pieceId=${selectedPieceId}`
         const response = await axios.post(url, formData, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         })
 
         showSuccessToast("Piece successfully updated. Moved to the next section.")
@@ -474,7 +472,7 @@ export default function DashboardPage() {
         onClose()
       } catch (error) {
         console.error("Error submitting data:", error)
-        showErrorToast(`Error submitting data ${error}`)
+        showErrorToast(`Error submitting data: ${error.response.data.message}`)
       }
     }
 
@@ -546,11 +544,8 @@ export default function DashboardPage() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
       const token = localStorage.getItem("token")
 
-      const response = await axios.post(`${apiBaseUrl}/worker/piece/flag/${piece._id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await axios.post(`${apiBaseUrl}/worker/piece/flag/${piece._id}`, {}, {
+        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       })
 
       showSuccessToast("Piece Flagged Successfully")

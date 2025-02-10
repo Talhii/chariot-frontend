@@ -26,6 +26,7 @@ export default function AddOrder() {
     dueDate: "",
     drawings: null,
     cuttingSheet: null,
+    takeOffSheet: null
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -46,6 +47,7 @@ export default function AddOrder() {
     uploadData.append("dueDate", formData.dueDate)
     if (formData.drawings) uploadData.append("files", formData.drawings)
     if (formData.cuttingSheet) uploadData.append("files", formData.cuttingSheet)
+    if (formData.takeOffSheet) uploadData.append("files", formData.takeOffSheet)
 
     try {
       await axios.post(`${apiBaseUrl}/admin/order`, uploadData, {
@@ -146,6 +148,21 @@ export default function AddOrder() {
                     required
                   />
                   {formData.cuttingSheet && <FileIcon className="h-5 w-5 text-green-500" />}
+                </div>
+              </div>
+
+              <div className="text-white space-y-2">
+                <Label htmlFor="takeOffSheet">Take OFF Sheet (Excel Only)</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="takeOffSheet"
+                    type="file"
+                    accept=".xlsx"
+                    onChange={(e) => handleFileChange(e, "takeOffSheet")}
+                    className="bg-gray-800 text-white border-gray-700"
+                    required
+                  />
+                  {formData.takeOffSheet && <FileIcon className="h-5 w-5 text-green-500" />}
                 </div>
               </div>
             </div>
