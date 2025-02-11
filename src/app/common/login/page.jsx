@@ -20,7 +20,6 @@ export default function Login() {
   const [accessCode, setAccessCode] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role)
@@ -41,9 +40,10 @@ export default function Login() {
 
         if (response?.data?.success) {
           localStorage.setItem("token", response?.data?.token);
+          showSuccessToast("Login Succesfull")
           router.push(`/${selectedRole}/dashboard`);
         } else {
-          setErrorMessage("Login failed. Please check your credentials.")
+          showErrorToast("Login failed. Please check your credentials.")
         }
       } else if (selectedRole === "manager" || selectedRole === "admin") {
         response = await axios.post(`${apiBaseUrl}/login`, {
@@ -54,14 +54,15 @@ export default function Login() {
 
         if (response?.data?.success) {
           localStorage.setItem("token", response?.data?.token);
+          showSuccessToast("Login Succesfull")
           router.push('/admin/dashboard')
         } else {
-          setErrorMessage("Login failed. Please check your credentials.")
+          showErrorToast("Login failed. Please check your credentials.")
         }
       }
     } catch (error) {
       console.error("Error during login:", error)
-      setErrorMessage("Login failed. Please check your credentials.")
+      showErrorToast("Login failed. Please check your credentials.")
     }
   }
 
@@ -163,9 +164,6 @@ export default function Login() {
                 >
                   Login
                 </Button>
-
-
-                {errorMessage && <p className="text-red-400 text-sm text-center mt-2">{errorMessage}</p>}
               </div>
             </CardContent>
           </Card>

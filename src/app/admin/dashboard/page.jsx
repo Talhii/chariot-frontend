@@ -72,7 +72,6 @@ export default function AdminDashboard() {
   }
 
   const generateReport = () => {
-    // Prepare data for the Excel file
     const data = [
       ["Total Pieces", dashboardData?.counts?.pieceCount],
       ["Flagged Pieces", dashboardData?.counts?.flaggedPiecesCount],
@@ -83,7 +82,6 @@ export default function AdminDashboard() {
       ["Order ID", "Project Name", "Customer Name", "Due Date", "Status"],
     ]
 
-    // Add order data
     dashboardData?.orders?.forEach((order) => {
       data.push([
         order._id,
@@ -94,12 +92,10 @@ export default function AdminDashboard() {
       ])
     })
 
-    // Create a new workbook and add the data
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.aoa_to_sheet(data)
     XLSX.utils.book_append_sheet(wb, ws, "Report")
 
-    // Generate and download the Excel file
     XLSX.writeFile(wb, "admin_report.xlsx")
     showSuccessToast("Report generated successfully")
   }
@@ -139,7 +135,6 @@ export default function AdminDashboard() {
         </Button>
       </header>
 
-      {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className={cardStyle}>
           <CardContent className="flex items-center justify-between p-6">
@@ -187,7 +182,6 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Chart and Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className={`lg:col-span-2 ${cardStyle}`}>
           <CardHeader>
@@ -244,7 +238,6 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Workers and Orders */}
       <div className="grid grid-cols-1 gap-6 mb-8">
         <Card className={cardStyle}>
           <CardHeader>
@@ -297,8 +290,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Action Center */}
 
       {decodedToken?.user.role == "Admin" && (
         <Card className={cardStyle}>

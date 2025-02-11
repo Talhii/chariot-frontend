@@ -32,7 +32,8 @@ export default function DashboardPage() {
   const [enlargedImage, setEnlargedImage] = useState(null)
   const [isScanning, setIsScanning] = useState(false)
   const [scannedData, setScannedData] = useState(null)
-  const [isSectionOneUser, setIsSectionOneUser] = useState(false);
+  const [isSectionOneUser, setIsSectionOneUser] = useState(false)
+  const [pdfViewerUrl, setPdfViewerUrl] = useState(null)
 
   useEffect(() => {
     async function fetchUser() {
@@ -44,12 +45,12 @@ export default function DashboardPage() {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
         const response = await axios.get(`${apiBaseUrl}/admin/user/${userId}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         })
-        const userData = response.data.data;
-        setUser(userData);
-        setIsSectionOneUser(userData.section.number == 1);
+        const userData = response.data.data
+        setUser(userData)
+        setIsSectionOneUser(userData.section.number == 1)
       } else {
         router.push("/")
       }
@@ -64,7 +65,7 @@ export default function DashboardPage() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
       const response = await axios.get(`${apiBaseUrl}/worker/order?sectionNumber=${user?.section.number}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       })
 
@@ -75,7 +76,7 @@ export default function DashboardPage() {
     if (user?.section.number) {
       fetchOrders()
     }
-  }, [user, piecesChange])
+  }, [user])
 
   useEffect(() => {
     let html5QrCode
@@ -108,7 +109,7 @@ export default function DashboardPage() {
         html5QrCode
           .stop()
           .then(() => html5QrCode.clear())
-          .catch(() => { })
+          .catch(() => {})
       }
     }
   }, [isScanning])
@@ -117,23 +118,29 @@ export default function DashboardPage() {
     async function fetchPieceandCompareSection() {
       const token = localStorage.getItem("token")
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
-      const response = await axios.get(`${apiBaseUrl}/worker/piece/${scannedData}`, {
+
+      const lines = scannedData.split("\n")
+
+      // Extract values safely
+      const code = lines[0].replace("code:", "").trim()
+      const number = lines[1].replace("number:", "").trim()
+
+      const response = await axios.get(`${apiBaseUrl}/worker/piece/${encodeURIComponent(code)}/${number}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      const piece = response.data.data;
+      const piece = response.data.data
 
       if (piece.currentSectionId.number == user?.section.number) {
         handleOpenSubmitModal(null, scannedData)
-      }
-      else {
+      } else {
         showErrorToast("Piece does not belong to this section")
       }
     }
 
     if (scannedData) {
-      fetchPieceandCompareSection();
+      fetchPieceandCompareSection()
     }
   }, [scannedData])
 
@@ -175,7 +182,6 @@ export default function DashboardPage() {
                 setPictureName("Captured Image")
                 stream.getTracks().forEach((track) => track.stop())
 
-                // Convert data URL to File object
                 fetch(dataUrl)
                   .then((res) => res.blob())
                   .then((blob) => {
@@ -197,13 +203,11 @@ export default function DashboardPage() {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-4 text-blue-400">Upload Picture</h3>
         <div className="flex flex-col sm:flex-row items-center justify-start w-full space-y-4 sm:space-y-0 sm:space-x-4">
-          {/* Upload File Button */}
           <label
             htmlFor="file-upload"
             className="cursor-pointer px-4 py-2 bg-white text-black hover:bg-gray-200 hover:text-black rounded-md text-center w-full sm:w-[250px] transition-colors flex items-center justify-center"
           >
             <Camera className="mr-2 h-4 w-4" />
-            {/* <File className="mr-2 h-4 w-4" /> */}
             Upload Photo
           </label>
           <input id="file-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
@@ -221,7 +225,6 @@ export default function DashboardPage() {
 
         {pictureName && <p className="text-white ml-4 mt-2">{pictureName}</p>}
 
-        {/* Display the captured or uploaded image */}
         {imageSrc && (
           <div className="mt-4">
             <img
@@ -305,6 +308,10 @@ export default function DashboardPage() {
       setExpandedOrderId(expandedOrderId === orderId ? null : orderId)
     }
 
+    const handleViewPdf = (url) => {
+      setPdfViewerUrl(url)
+    }
+
     return (
       <div className="rounded-md bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white overflow-x-auto">
         <Table>
@@ -328,7 +335,7 @@ export default function DashboardPage() {
                         variant="ghost"
                         size="sm"
                         className="hover:bg-transparent text-blue-400 hover:text-blue-300 w-full sm:w-auto"
-                        onClick={() => window.open(order?.drawings[0]?.url, "_blank")}
+                        onClick={() => handleViewPdf(order?.drawings[0]?.url)}
                       >
                         <FileText className="mr-2 h-4 w-4" />
                         View Drawing
@@ -340,7 +347,7 @@ export default function DashboardPage() {
                           variant="ghost"
                           size="sm"
                           className="hover:bg-transparent text-blue-400 hover:text-blue-300 w-full sm:w-auto"
-                          onClick={() => window.open(order?.drawings[1]?.url, "_blank")}
+                          onClick={() => handleViewPdf(order?.drawings[1]?.url)}
                         >
                           <FileText className="mr-2 h-4 w-4" />
                           View Sheet
@@ -461,7 +468,7 @@ export default function DashboardPage() {
           ? `${apiBaseUrl}/worker/piece?orderId=${selectedOrderId}`
           : `${apiBaseUrl}/worker/piece?pieceId=${selectedPieceId}`
         const response = await axios.post(url, formData, {
-          headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         })
 
         showSuccessToast("Piece successfully updated. Moved to the next section.")
@@ -544,9 +551,13 @@ export default function DashboardPage() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
       const token = localStorage.getItem("token")
 
-      const response = await axios.post(`${apiBaseUrl}/worker/piece/flag/${piece._id}`, {}, {
-        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-      })
+      const response = await axios.post(
+        `${apiBaseUrl}/worker/piece/flag/${piece._id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        },
+      )
 
       showSuccessToast("Piece Flagged Successfully")
       setPiecesChange(true)
@@ -663,9 +674,7 @@ export default function DashboardPage() {
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-
-          {/* First Card - Assigned Section with reduced height */}
-          <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700 h-70 sm:h-72 lg:h-74"> {/* Reduced height */}
+          <Card className="bg-gray-800 bg-opacity-30 backdrop-filter backdrop-blur-lg border border-gray-700 h-70 sm:h-72 lg:h-74">
             <CardHeader>
               <CardTitle className="text-white">Assigned Section</CardTitle>
             </CardHeader>
@@ -675,9 +684,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Total Orders and Total Current Pieces Cards */}
           <div className="lg:flex lg:flex-col lg:space-y-6 sm:flex sm:flex-col sm:space-y-6 gap-0 mb-8">
-            {/* Total Orders Card */}
             <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-bold">Total Orders</CardTitle>
@@ -687,7 +694,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Total Current Pieces Card */}
             {!isSectionOneUser && (
               <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -700,29 +706,26 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* QR Code Card with reduced height */}
           {!isSectionOneUser && (
-            <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 mb-8 h-70 sm:h-72 lg:h-74 flex flex-col justify-between"> {/* Flex added for vertical alignment */}
+            <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 mb-8 h-70 sm:h-72 lg:h-74 flex flex-col justify-between">
               <CardHeader>
                 <CardTitle className="text-white">QR Code Scanner</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col justify-center items-center"> {/* Flex added for centering */}
-                <div id="qr-reader" className="w-32 h-32 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div> {/* Adjusted height */}
+              <CardContent className="flex flex-col justify-center items-center">
+                <div id="qr-reader" className="w-32 h-32 bg-gray-700 mx-auto mb-4 rounded-lg overflow-hidden"></div>
                 <Button
                   className="w-full bg-white text-black hover:bg-gray-200 hover:text-black"
                   onClick={() => {
-                    setScannedData(null);
+                    setScannedData(null)
                     setIsScanning(!isScanning)
                   }}
                 >
-                  {isScanning ? "Stop Scanning" : "Start Scanning"}
+                  <Camera className="mr-2 h-4 w-4" /> {isScanning ? "Stop Scanning" : "Start Scanning"}
                 </Button>
               </CardContent>
             </Card>
           )}
         </div>
-
-
 
         <OrdersTable
           Orders={orders}
@@ -745,8 +748,24 @@ export default function DashboardPage() {
           onClose={handleCloseViewPieceModal}
         />
         <EnlargedImageModal imageUrl={enlargedImage} onClose={() => setEnlargedImage(null)} />
+        {pdfViewerUrl && <PdfViewer url={pdfViewerUrl} onClose={() => setPdfViewerUrl(null)} />}
       </div>
       <ToastContainer />
+    </div>
+  )
+}
+
+function PdfViewer({ url, onClose }) {
+  if (!url) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="relative w-full h-full max-w-4xl max-h-full">
+        <iframe src={`${url}#toolbar=0`} className="w-full h-full border-0" title="PDF Viewer" />
+        <Button className="absolute top-4 right-4 bg-white text-black hover:bg-gray-200" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   )
 }

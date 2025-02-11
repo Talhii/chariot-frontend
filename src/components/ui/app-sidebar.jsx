@@ -61,17 +61,14 @@ export function AppSidebar({ className, ...props }) {
 
   return (
     <>
-      {/* Sidebar */}
       <Sidebar
         className={cn("border-r border-gray-800 bg-gray-900 w-64 shadow-lg", className)}
         {...props}
       >
-        {/* Sidebar Header */}
         <SidebarHeader className="p-6 flex items-center justify-between border-b border-gray-700">
           <h2 className="text-xl font-bold text-white">Admin Panel</h2>
         </SidebarHeader>
 
-        {/* Sidebar Content */}
         <SidebarContent className="p-4">
           <SidebarGroup>
             <SidebarGroupContent>
@@ -93,7 +90,6 @@ export function AppSidebar({ className, ...props }) {
           </SidebarGroup>
         </SidebarContent>
 
-        {/* User Info and Logout */}
         {user && (
           <div className="p-4 mt-auto bg-gray-800 rounded-t-lg border-t border-gray-700">
             <div className="flex items-center">
