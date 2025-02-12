@@ -1,11 +1,11 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FileText, Eye, CheckCheck, Plus, ListCollapse, Flag, X, Camera, File } from "lucide-react"
+import { FileText, Eye, CheckCheck, Plus, ListCollapse, Flag, X, Camera } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
@@ -22,11 +22,11 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState(null)
   const [piecesCount, setPiecesCount] = useState(null)
   const [piecesChange, setPiecesChange] = useState(false)
-  const router = useRouter()
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
   const [isViewPieceModalOpen, setIsViewPieceModalOpen] = useState(false)
   const [selectedPieceId, setSelectedPieceId] = useState(null)
   const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [selectedCode, setSelectedCode] = useState(null)
   const [selectedPiece, setSelectedPiece] = useState(null)
   const [expandedOrderId, setExpandedOrderId] = useState(null)
   const [enlargedImage, setEnlargedImage] = useState(null)
@@ -34,6 +34,9 @@ export default function DashboardPage() {
   const [scannedData, setScannedData] = useState(null)
   const [isSectionOneUser, setIsSectionOneUser] = useState(false)
   const [pdfViewerUrl, setPdfViewerUrl] = useState(null)
+  const [currentTab, setCurrentTab] = useState("Current")
+  const [searchTerm, setSearchTerm] = useState("")
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchUser() {
@@ -73,7 +76,7 @@ export default function DashboardPage() {
       setPiecesCount(response.data.piecesCount)
     }
 
-    if (user?.section.number) {
+    if (user?.section?.number) {
       fetchOrders()
     }
   }, [user])
@@ -121,7 +124,6 @@ export default function DashboardPage() {
 
       const lines = scannedData.split("\n")
 
-      // Extract values safely
       const code = lines[0].replace("code:", "").trim()
       const number = lines[1].replace("number:", "").trim()
 
@@ -142,7 +144,7 @@ export default function DashboardPage() {
     if (scannedData) {
       fetchPieceandCompareSection()
     }
-  }, [scannedData])
+  }, [scannedData, user])
 
   const PictureUpload = ({ onImageSelect }) => {
     const [pictureName, setPictureName] = useState("")
@@ -161,44 +163,6 @@ export default function DashboardPage() {
       }
     }
 
-    const handleCameraCapture = () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices
-          .getUserMedia({ video: true })
-          .then((stream) => {
-            const video = document.createElement("video")
-            video.srcObject = stream
-            video.play()
-
-            const canvas = document.createElement("canvas")
-            const ctx = canvas.getContext("2d")
-            video.addEventListener("play", () => {
-              setTimeout(() => {
-                canvas.width = video.videoWidth
-                canvas.height = video.videoHeight
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-                const dataUrl = canvas.toDataURL("image/png")
-                setImageSrc(dataUrl)
-                setPictureName("Captured Image")
-                stream.getTracks().forEach((track) => track.stop())
-
-                fetch(dataUrl)
-                  .then((res) => res.blob())
-                  .then((blob) => {
-                    const file = new File([blob], "captured_image.png", { type: "image/png" })
-                    onImageSelect(file)
-                  })
-              }, 1000)
-            })
-          })
-          .catch((err) => {
-            console.error("Camera error: ", err)
-          })
-      } else {
-        alert("Camera is not available on this device.")
-      }
-    }
-
     return (
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-4 text-blue-400">Upload Picture</h3>
@@ -211,16 +175,6 @@ export default function DashboardPage() {
             Upload Photo
           </label>
           <input id="file-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-
-          {/* Open Camera Button */}
-          {/* <button
-            type="button"
-            onClick={handleCameraCapture}
-            className="cursor-pointer px-4 py-2 bg-white text-black hover:bg-gray-200 hover:text-black rounded-md text-center w-full sm:w-[250px] transition-colors flex items-center justify-center"
-          >
-            <Camera className="mr-2 h-4 w-4" />
-            Open Camera
-          </button> */}
         </div>
 
         {pictureName && <p className="text-white ml-4 mt-2">{pictureName}</p>}
@@ -244,7 +198,8 @@ export default function DashboardPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-gray-400">Piece Number</TableHead>
+              <TableHead className="text-gray-400">Number</TableHead>
+              <TableHead className="text-gray-400">Code</TableHead>
               <TableHead className="text-gray-400">Section Name</TableHead>
               <TableHead className="text-gray-400">History</TableHead>
               <TableHead className="text-gray-400">Actions</TableHead>
@@ -256,6 +211,7 @@ export default function DashboardPage() {
               Pieces.map((piece) => (
                 <TableRow key={piece._id}>
                   <TableCell className="text-white">{piece.number}</TableCell>
+                  <TableCell className="text-white">{piece.code}</TableCell>
                   <TableCell className="text-white">{piece.currentSectionId.name}</TableCell>
                   <TableCell className="m-4">
                     <Button
@@ -276,7 +232,7 @@ export default function DashboardPage() {
                       disabled={Tab == "InComing"}
                       size="sm"
                       className="bg-white text-black hover:bg-gray-200 w-full sm:w-auto"
-                      onClick={() => onOpenSubmitModal(null, piece._id)}
+                      onClick={() => onOpenSubmitModal(null, piece._id, null)}
                     >
                       <CheckCheck className="mr-2 h-4 w-4" />
                       Move to Next Section
@@ -298,11 +254,13 @@ export default function DashboardPage() {
   }
 
   function OrdersTable({ Orders, onOpenSubmitModal, onOpenViewPieceModal, expandedOrderId, setExpandedOrderId }) {
-    const [currentTab, setCurrentTab] = useState("Current")
+    const searchInputRef = useRef(null)
 
-    const handleAddPieceClick = (orderId) => {
-      onOpenSubmitModal(orderId, null)
-    }
+    useEffect(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus()
+      }
+    }, [expandedOrderId])
 
     const handleExpandToggle = (orderId) => {
       setExpandedOrderId(expandedOrderId === orderId ? null : orderId)
@@ -310,6 +268,10 @@ export default function DashboardPage() {
 
     const handleViewPdf = (url) => {
       setPdfViewerUrl(url)
+    }
+
+    const filteredTakeOffData = (takeOffData) => {
+      return takeOffData.filter((item) => item.code.toLowerCase().includes(searchTerm.toLowerCase()))
     }
 
     return (
@@ -354,71 +316,106 @@ export default function DashboardPage() {
                         </Button>
                       </TableCell>
                     )}
-                    {isSectionOneUser && (
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-white text-black hover:bg-gray-200 w-full sm:w-auto"
-                          onClick={() => handleAddPieceClick(order._id)}
-                        >
-                          <Plus className="mr-2 h-4 w-4" /> Add Piece
-                        </Button>
-                      </TableCell>
-                    )}
-
-                    {!isSectionOneUser && (
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-white text-black hover:bg-gray-200 w-full sm:w-auto"
-                          onClick={() => handleExpandToggle(order._id)}
-                        >
-                          <ListCollapse className="mr-2 h-4 w-4" />{" "}
-                          {expandedOrderId === order._id ? "Collapse" : "Expand"}
-                        </Button>
-                      </TableCell>
-                    )}
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white text-black hover:bg-gray-200 w-full sm:w-auto"
+                        onClick={() => handleExpandToggle(order._id)}
+                      >
+                        <ListCollapse className="mr-2 h-4 w-4" />
+                        {expandedOrderId === order._id ? "Collapse" : "Expand"}
+                      </Button>
+                    </TableCell>
                   </TableRow>
 
-                  {!isSectionOneUser && expandedOrderId === order._id && (
+                  {expandedOrderId === order._id && (
                     <TableRow>
                       <TableCell colSpan="5">
-                        <Tabs value={currentTab} onValueChange={(tab) => setCurrentTab(tab)} className="w-full mt-4">
-                          <TabsList className="grid w-full sm:w-[300px] grid-cols-2 bg-gray-800 mb-4 mx-auto">
-                            <TabsTrigger
-                              value="Current"
-                              className="flex justify-center items-center py-2 data-[state=active]:bg-white data-[state=active]:text-black"
-                            >
-                              Current
-                            </TabsTrigger>
-                            <TabsTrigger
-                              value="InComing"
-                              className="flex justify-center items-center py-2 data-[state=active]:bg-white data-[state=active]:text-black"
-                            >
-                              InComing
-                            </TabsTrigger>
-                          </TabsList>
+                        {isSectionOneUser ? (
+                          <div className="mt-4">
+                            <div className="mb-4">
+                              <input
+                                ref={searchInputRef}
+                                type="text"
+                                placeholder="Search by code ..."
+                                className="w-full p-2 bg-gray-700 text-white rounded"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                  e.preventDefault()
+                                  setSearchTerm(e.target.value)
+                                }}
+                                onKeyDown={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <div className="max-h-96 overflow-y-auto">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead className="text-gray-400">Code</TableHead>
+                                    <TableHead className="text-gray-400">Number of Pieces</TableHead>
+                                    <TableHead className="text-gray-400">Remaining Pieces</TableHead>
+                                    <TableCell className="text-white">Action</TableCell>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {filteredTakeOffData(order.takeOffData).map((item, index) => (
+                                    <TableRow key={index}>
+                                      <TableCell className="text-white">{item.code}</TableCell>
+                                      <TableCell className="text-white">{item.noOfPiece}</TableCell>
+                                      <TableCell className="text-white">{item.remainingPiece}</TableCell>
+                                      <TableCell className="text-white">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="bg-white text-black hover:bg-gray-200 w-full sm:w-auto"
+                                          onClick={() => onOpenSubmitModal(order._id, null, item.code)}
+                                        >
+                                          <Plus className="mr-2 h-4 w-4" /> Add Piece
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        ) : (
+                          <Tabs value={currentTab} onValueChange={(tab) => setCurrentTab(tab)} className="w-full mt-4">
+                            <TabsList className="grid w-full sm:w-[400px] grid-cols-2 bg-gray-800 mb-4 mx-auto">
+                              <TabsTrigger
+                                value="Current"
+                                className="flex justify-center items-center py-2 data-[state=active]:bg-white data-[state=active]:text-black"
+                              >
+                                Current
+                              </TabsTrigger>
+                              <TabsTrigger
+                                value="InComing"
+                                className="flex justify-center items-center py-2 data-[state=active]:bg-white data-[state=active]:text-black"
+                              >
+                                InComing
+                              </TabsTrigger>
+                            </TabsList>
 
-                          <TabsContent value="Current">
-                            <ProjectTable
-                              Pieces={order.currentPieces}
-                              Tab={"Current"}
-                              onOpenSubmitModal={onOpenSubmitModal}
-                              onOpenViewPieceModal={onOpenViewPieceModal}
-                            />
-                          </TabsContent>
+                            <TabsContent value="Current">
+                              <ProjectTable
+                                Pieces={order.currentPieces}
+                                Tab={"Current"}
+                                onOpenSubmitModal={onOpenSubmitModal}
+                                onOpenViewPieceModal={onOpenViewPieceModal}
+                              />
+                            </TabsContent>
 
-                          <TabsContent value="InComing">
-                            <ProjectTable
-                              Pieces={order.inComingPieces}
-                              Tab={"InComing"}
-                              onOpenSubmitModal={onOpenSubmitModal}
-                              onOpenViewPieceModal={onOpenViewPieceModal}
-                            />
-                          </TabsContent>
-                        </Tabs>
+                            <TabsContent value="InComing">
+                              <ProjectTable
+                                Pieces={order.inComingPieces}
+                                Tab={"InComing"}
+                                onOpenSubmitModal={onOpenSubmitModal}
+                                onOpenViewPieceModal={onOpenViewPieceModal}
+                              />
+                            </TabsContent>
+                          </Tabs>
+                        )}
                       </TableCell>
                     </TableRow>
                   )}
@@ -437,7 +434,7 @@ export default function DashboardPage() {
     )
   }
 
-  function SubmitModal({ isOpen, onClose, selectedOrderId, selectedPieceId, User }) {
+  function SubmitModal({ isOpen, onClose, selectedOrderId, selectedPieceId, User, setOrders, setPiecesCount }) {
     if (!isOpen) return null
 
     const [checkedStates, setCheckedStates] = useState({})
@@ -460,7 +457,7 @@ export default function DashboardPage() {
         const formData = new FormData()
         formData.append("file", selectedImage)
         formData.append("sectionNumber", sectionNumber)
-        formData.append("code", "UNIT #1-K-1")
+        formData.append("code", selectedCode)
 
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
@@ -472,14 +469,23 @@ export default function DashboardPage() {
         })
 
         showSuccessToast("Piece successfully updated. Moved to the next section.")
+        onClose()
 
         setSelectedImage(null)
         setCheckedStates({})
         setPiecesChange(true)
-        onClose()
+
+        const ordersResponse = await axios.get(`${apiBaseUrl}/worker/order?sectionNumber=${sectionNumber}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        setOrders(ordersResponse.data.data)
+        setPiecesCount(ordersResponse.data.piecesCount)
+        
       } catch (error) {
         console.error("Error submitting data:", error)
-        showErrorToast(`Error submitting data: ${error.response.data.message}`)
+        showErrorToast(`Error submitting data: ${error.response?.data?.message}`)
       }
     }
 
@@ -632,9 +638,10 @@ export default function DashboardPage() {
     )
   }
 
-  const handleOpenSubmitModal = (orderId, pieceId) => {
+  const handleOpenSubmitModal = (orderId, pieceId, code) => {
     setSelectedOrderId(orderId)
     setSelectedPieceId(pieceId)
+    setSelectedCode(code)
     setIsSubmitModalOpen(true)
     if (orderId) setExpandedOrderId(orderId)
   }
@@ -643,6 +650,7 @@ export default function DashboardPage() {
     setIsSubmitModalOpen(false)
     setSelectedOrderId(null)
     setSelectedPieceId(null)
+    setSelectedCode(null)
   }
 
   const handleOpenViewPieceModal = (piece) => {
@@ -741,6 +749,8 @@ export default function DashboardPage() {
           selectedOrderId={selectedOrderId}
           selectedPieceId={selectedPieceId}
           User={user}
+          setOrders={setOrders}
+          setPiecesCount={setPiecesCount}
         />
         <ViewPieceDetailsModal
           piece={selectedPiece}
@@ -769,3 +779,4 @@ function PdfViewer({ url, onClose }) {
     </div>
   )
 }
+

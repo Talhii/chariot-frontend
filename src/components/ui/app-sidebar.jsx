@@ -25,6 +25,7 @@ const sidebarItems = [
   { icon: Users, label: "Pieces", path: "/admin/piece" },
   { icon: User, label: "Users", path: "/admin/user" },
   { icon: Layers, label: "Sections", path: "/admin/section" },
+  { icon: Layers, label: "Progress", path: "/admin/progress" },
 ]
 
 export function AppSidebar({ className, ...props }) {

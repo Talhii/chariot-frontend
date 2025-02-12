@@ -36,10 +36,6 @@ export default function Pieces() {
         fetchPieces();
     }, [pieceToDelete]);
 
-    const handleAddPieceClick = () => {
-        router.push("/admin/piece/add");
-    };
-
     const handleEditPieceClick = (sectionId) => {
         router.push(`/admin/piece/edit/${sectionId}`);
     };
@@ -83,7 +79,9 @@ export default function Pieces() {
                 <table className="w-full text-left text-lg text-gray-400">
                     <thead className="bg-gray-900">
                         <tr>
-                            <th className="px-8 py-4">Piece Number</th>
+                            <th className="px-8 py-4">Code</th>
+                            <th className="px-8 py-4">Number</th>
+                            <th className="px-8 py-4">Project Name</th>
                             <th className="px-8 py-4">Current Section</th>
                             <th className="px-8 py-4">Status</th>
                             {decodedToken?.user.role == "Admin" && <th className="px-8 py-4">Actions</th>}
@@ -92,7 +90,9 @@ export default function Pieces() {
                     <tbody>
                         {pieces.map((piece) => (
                             <tr key={piece._id} className="border-t border-gray-700">
+                                <td className="px-8 py-4">{piece.code}</td>
                                 <td className="px-8 py-4">{piece.number}</td>
+                                <td className="px-8 py-4">{piece.orderId.projectName}</td>
                                 <td className="px-8 py-4">{piece?.currentSectionId?.name}</td>
                                 <td className="px-8 py-4">
                                     <span

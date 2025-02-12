@@ -118,7 +118,6 @@ export default function AdminDashboard() {
       console.error("Error resolving piece", error)
       showErrorToast(`Error resolving piece ${error}`)
     }
-
     setDataChanged(true)
   }
 
