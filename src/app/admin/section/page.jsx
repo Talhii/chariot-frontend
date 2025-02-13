@@ -7,6 +7,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import jwt from 'jsonwebtoken';
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export default function Sections() {
     const [sections, setSections] = useState([]);
@@ -82,31 +84,31 @@ export default function Sections() {
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-semibold text-white">Sections</h2>
                 {decodedToken?.user.role == "Admin" &&
-                    <button
+                    <Button
                         onClick={handleAddSectionClick}
                         className="flex items-center px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-md hover:bg-gray-200 transition duration-200"
                     >
                         <Plus className="mr-2" />
                         Add Section
-                    </button>}
+                    </Button>}
             </div>
 
             <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
-                <table className="w-full text-left text-lg text-gray-400">
-                    <thead className="bg-gray-900">
-                        <tr>
-                            <th className="px-6 py-3">Section Number</th>
-                            <th className="px-6 py-3">Section</th>
-                            <th className="px-6 py-3">Checklist</th>
-                            {decodedToken?.user.role == "Admin" && <th className="px-6 py-3">Actions</th>}
-                        </tr>
-                    </thead>
-                    <tbody>
+                <Table className="w-full text-left text-lg text-gray-400">
+                    <TableHeader className="bg-gray-900">
+                        <TableRow>
+                            <TableHead className="px-6 py-3">Section Number</TableHead>
+                            <TableHead className="px-6 py-3">Section</TableHead>
+                            <TableHead className="px-6 py-3">Checklist</TableHead>
+                            {decodedToken?.user.role == "Admin" && <TableHead className="px-6 py-3">Actions</TableHead>}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {sections && sections.length > 0 ? sections.map((section) => (
-                            <tr key={section._id} className="border-t border-gray-700">
-                                <td className="px-6 py-3">{section.number}</td>
-                                <td className="px-6 py-3">{section.name}</td>
-                                <td className="px-6 py-3">
+                            <TableRow key={section._id} className="border-t border-gray-700">
+                                <TableCell className="px-6 py-3">{section.number}</TableCell>
+                                <TableCell className="px-6 py-3">{section.name}</TableCell>
+                                <TableCell className="px-6 py-3">
                                     <ul>
                                         {section.checklist.map((task) => (
                                             <li key={task._id} className="text-gray-300">
@@ -119,23 +121,23 @@ export default function Sections() {
                                             </li>
                                         ))}
                                     </ul>
-                                </td>
+                                </TableCell>
                                 {decodedToken?.user.role == "Admin" &&
-                                    <td className="flex justify-content px-4 py-4">
-                                        <button onClick={() => { handleEditSectionClick(section._id); }} className="text-blue-400 hover:text-blue-600">Edit</button>
-                                        <button onClick={() => { handleDeleteSectionClick(section); }} className="ml-4 text-red-400 hover:text-red-600">Delete</button>
-                                    </td>
+                                    <TableCell className="flex justify-content px-4 py-4">
+                                        <Button onClick={() => { handleEditSectionClick(section._id); }} className="bg-white text-black text-lg">Edit</Button>
+                                        <Button onClick={() => { handleDeleteSectionClick(section); }} className="bg-red-500 ml-6 text-white text-lg">Delete</Button>
+                                    </TableCell>
                                 }
-                            </tr>
+                            </TableRow>
                         )) : (
-                            <tr>
-                                <td colSpan="4" className="px-8 py-4 text-center">
+                            <TableRow>
+                                <TableCell colSpan="4" className="px-8 py-4 text-center">
                                     No Sections available
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         )}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
 
             {isModalOpen && (
@@ -143,18 +145,18 @@ export default function Sections() {
                     <div className="bg-gray-900 text-white rounded-lg p-6 max-w-sm mx-auto">
                         <h3 className="text-lg font-semibold mb-4">Are you sure you want to delete this section?</h3>
                         <div className="flex justify-between">
-                            <button
+                            <Button
                                 onClick={deleteSection}
                                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
                             >
                                 Yes, Delete
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={handleCancelDelete}
-                                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-200 transition duration-200"
+                                className="px-4 py-2 bg-gray-600 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200"
                             >
                                 Cancel
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

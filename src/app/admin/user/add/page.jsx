@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, User } from "lucide-react"
+import { startRegistration } from "@simplewebauthn/browser"
 
 const roles = ["Admin", "Manager", "Worker"]
 
@@ -28,7 +29,7 @@ export default function AddUser() {
   const [image, setImage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sections, setSections] = useState([])
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token")
 
   useEffect(() => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
@@ -36,9 +37,9 @@ export default function AddUser() {
       try {
         const response = await axios.get(`${apiBaseUrl}/admin/section`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+            Authorization: `Bearer ${token}`,
+          },
+        })
         setSections(response.data.data)
       } catch (error) {
         console.error("Error fetching sections:", error)
@@ -64,29 +65,49 @@ export default function AddUser() {
     e.preventDefault()
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
-    const newUser = {
-      fullName: formData.fullName,
-      role: formData.role,
-      username: formData.role === "Worker" ? undefined : formData.username,
-      password: formData.role === "Worker" ? undefined : formData.password,
-      accessCode: formData.role === "Worker" ? formData.accessCode : undefined,
-      section: formData.role === "Worker" ? formData.section : undefined,
-    }
-
-    const formDataToSend = new FormData()
-    Object.entries(newUser).forEach(([key, value]) => {
-      if (value) formDataToSend.append(key, value)
-    })
-
-    if (image) {
-      const imageFile = await fetch(image).then((res) => res.blob())
-      formDataToSend.append("file", imageFile, "profile.jpg")
-    }
-
     try {
       setIsLoading(true)
+
+      if (formData.role === "Worker") {
+        // WebAuthn registration for Worker
+        const registrationOptions = await axios.post(
+          `${apiBaseUrl}/admin/webauthn/generate-registration-options`,
+          { username: formData.fullName },
+          { headers: { Authorization: `Bearer ${token}` } },
+        )
+
+        const attResp = await startRegistration(registrationOptions.data)
+
+        const verificationResp = await axios.post(`${apiBaseUrl}/admin/webauthn/verify-registration`, attResp, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (!verificationResp.data.verified) {
+          throw new Error("WebAuthn registration failed")
+        }
+      }
+
+      const newUser = {
+        fullName: formData.fullName,
+        role: formData.role,
+        username: formData.role === "Worker" ? undefined : formData.username,
+        password: formData.role === "Worker" ? undefined : formData.password,
+        accessCode: formData.role === "Worker" ? formData.accessCode : undefined,
+        section: formData.role === "Worker" ? formData.section : undefined,
+      }
+
+      const formDataToSend = new FormData()
+      Object.entries(newUser).forEach(([key, value]) => {
+        if (value) formDataToSend.append(key, value)
+      })
+
+      if (image) {
+        const imageFile = await fetch(image).then((res) => res.blob())
+        formDataToSend.append("file", imageFile, "profile.jpg")
+      }
+
       await axios.post(`${apiBaseUrl}/admin/user`, formDataToSend, {
-        headers: { 'Authorization': `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       })
       showSuccessToast("User Created Successfully")
       router.push("/admin/user")
@@ -227,7 +248,10 @@ export default function AddUser() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
                 </>
               ) : (
-                "Save User"
+                <>
+                  Save User
+                  {formData.role === "Worker" && <span className="ml-2 text-xs">(WebAuthn registration required)</span>}
+                </>
               )}
             </Button>
           </form>

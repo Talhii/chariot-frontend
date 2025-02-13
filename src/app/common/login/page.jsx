@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToastContainer } from "react-toastify";
-
+import { Label } from "@/components/ui/label"
 import {
   InputOTP,
   InputOTPGroup,
@@ -109,7 +109,7 @@ export default function Login() {
 
               {selectedRole === "worker" && (
                 <div className="space-y-4">
-                  <label className="block w-full flex justify-center items-center">
+                  <Label className="block w-full flex justify-center items-center">
                     <div className="text-center">
                       <span className="text-white text-sm font-medium mb-1 block">Access Code</span>
                       <InputOTP
@@ -128,14 +128,14 @@ export default function Login() {
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
-                  </label>
+                  </Label>
 
                 </div>
               )}
 
               {(selectedRole === "manager" || selectedRole === "admin") && (
                 <div className="space-y-4">
-                  <label className="block">
+                  <Label className="block">
                     <span className="text-white text-sm font-medium mb-1 block">Username</span>
                     <Input
                       placeholder="Enter your username"
@@ -143,8 +143,8 @@ export default function Login() {
                       onChange={(e) => setUsername(e.target.value)}
                       className="bg-gray-700 bg-opacity-50 border-gray-600 text-white placeholder-gray-400"
                     />
-                  </label>
-                  <label className="block">
+                  </Label>
+                  <Label className="block">
                     <span className="text-white text-sm font-medium mb-1 block">Password</span>
                     <Input
                       placeholder="Enter your password"
@@ -153,7 +153,7 @@ export default function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="bg-gray-700 bg-opacity-50 border-gray-600 text-white placeholder-gray-400"
                     />
-                  </label>
+                  </Label>
                 </div>
               )}
 

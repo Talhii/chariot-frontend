@@ -6,6 +6,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import jwt from 'jsonwebtoken';
 import { showErrorToast, showSuccessToast } from "@/lib/utils";
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export default function Pieces() {
     const router = useRouter();
@@ -76,25 +78,25 @@ export default function Pieces() {
             </div>
 
             <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
-                <table className="w-full text-left text-lg text-gray-400">
-                    <thead className="bg-gray-900">
-                        <tr>
-                            <th className="px-8 py-4">Code</th>
-                            <th className="px-8 py-4">Number</th>
-                            <th className="px-8 py-4">Project Name</th>
-                            <th className="px-8 py-4">Current Section</th>
-                            <th className="px-8 py-4">Status</th>
-                            {decodedToken?.user.role == "Admin" && <th className="px-8 py-4">Actions</th>}
-                        </tr>
-                    </thead>
-                    <tbody>
+                <Table className="w-full text-left text-lg text-gray-400">
+                    <TableHeader className="bg-gray-900">
+                        <TableRow>
+                            <TableHead className="px-8 py-4">Code</TableHead>
+                            <TableHead className="px-8 py-4">Number</TableHead>
+                            <TableHead className="px-8 py-4">Project Name</TableHead>
+                            <TableHead className="px-8 py-4">Current Section</TableHead>
+                            <TableHead className="px-8 py-4">Status</TableHead>
+                            {decodedToken?.user.role == "Admin" && <TableHead className="px-8 py-4">Actions</TableHead>}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {pieces.map((piece) => (
-                            <tr key={piece._id} className="border-t border-gray-700">
-                                <td className="px-8 py-4">{piece.code}</td>
-                                <td className="px-8 py-4">{piece.number}</td>
-                                <td className="px-8 py-4">{piece.orderId.projectName}</td>
-                                <td className="px-8 py-4">{piece?.currentSectionId?.name}</td>
-                                <td className="px-8 py-4">
+                            <TableRow key={piece._id} className="border-t border-gray-700">
+                                <TableCell className="px-8 py-4">{piece.code}</TableCell>
+                                <TableCell className="px-8 py-4">{piece.number}</TableCell>
+                                <TableCell className="px-8 py-4">{piece.orderId.projectName}</TableCell>
+                                <TableCell className="px-8 py-4">{piece?.currentSectionId?.name}</TableCell>
+                                <TableCell className="px-8 py-4">
                                     <span
                                         className={`px-4 py-2 rounded-full text-lg ${piece.status === "Pending"
                                             ? "bg-yellow-500 text-yellow-900"
@@ -107,17 +109,17 @@ export default function Pieces() {
                                     >
                                         {piece.status}
                                     </span>
-                                </td>
+                                </TableCell>
                                 {decodedToken?.user.role == "Admin" &&
-                                    <td className="flex justify-content px-4 py-4">
-                                        <button onClick={() => { handleEditPieceClick(piece._id); }} className="text-blue-400 hover:text-blue-600 text-lg" >Edit</button>
-                                        <button onClick={() => handleDeletePieceClick(piece)} className="ml-6 text-red-400 hover:text-red-600 text-lg">Delete</button>
-                                    </td>
+                                    <TableCell className="flex justify-content px-4 py-4">
+                                        <Button onClick={() => { handleEditPieceClick(piece._id); }} className="bg-white text-black text-lg" >Edit</Button>
+                                        <Button onClick={() => handleDeletePieceClick(piece)} className="bg-red-500 ml-6 text-white text-lg">Delete</Button>
+                                    </TableCell>
                                 }
-                            </tr>
+                            </TableRow>
                         ))}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
 
             {isModalOpen && (
@@ -125,18 +127,18 @@ export default function Pieces() {
                     <div className="bg-gray-900 text-white rounded-lg p-6 max-w-sm mx-auto">
                         <h3 className="text-lg font-semibold mb-4">Are you sure you want to delete this piece?</h3>
                         <div className="flex justify-between">
-                            <button
+                            <Button
                                 onClick={deletePiece}
                                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-200"
                             >
                                 Yes, Delete
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={handleCancelDelete}
-                                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-200 transition duration-200"
+                                className="px-4 py-2 bg-gray-600 bg-white text-black rounded-md hover:bg-gray-200 transition duration-200"
                             >
                                 Cancel
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

@@ -16,6 +16,8 @@ import { Separator } from "@/components/ui/separator"
 import { ToastContainer } from "react-toastify"
 import { showSuccessToast, showErrorToast } from "@/lib/utils"
 import { Html5Qrcode } from "html5-qrcode"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null)
@@ -32,7 +34,10 @@ export default function DashboardPage() {
   const [enlargedImage, setEnlargedImage] = useState(null)
   const [isScanning, setIsScanning] = useState(false)
   const [scannedData, setScannedData] = useState(null)
+
   const [isSectionOneUser, setIsSectionOneUser] = useState(false)
+  const [isSectionFiveUser, setIsSectionFiveUser] = useState(false)
+
   const [pdfViewerUrl, setPdfViewerUrl] = useState(null)
   const [currentTab, setCurrentTab] = useState("Current")
   const [searchTerm, setSearchTerm] = useState("")
@@ -54,6 +59,7 @@ export default function DashboardPage() {
         const userData = response.data.data
         setUser(userData)
         setIsSectionOneUser(userData.section.number == 1)
+        setIsSectionFiveUser(userData.section.number == 5)
       } else {
         router.push("/")
       }
@@ -112,7 +118,7 @@ export default function DashboardPage() {
         html5QrCode
           .stop()
           .then(() => html5QrCode.clear())
-          .catch(() => {})
+          .catch(() => { })
       }
     }
   }, [isScanning])
@@ -167,14 +173,14 @@ export default function DashboardPage() {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-4 text-blue-400">Upload Picture</h3>
         <div className="flex flex-col sm:flex-row items-center justify-start w-full space-y-4 sm:space-y-0 sm:space-x-4">
-          <label
+          <Label
             htmlFor="file-upload"
             className="cursor-pointer px-4 py-2 bg-white text-black hover:bg-gray-200 hover:text-black rounded-md text-center w-full sm:w-[250px] transition-colors flex items-center justify-center"
           >
             <Camera className="mr-2 h-4 w-4" />
             Upload Photo
-          </label>
-          <input id="file-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+          </Label>
+          <Input id="file-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
         </div>
 
         {pictureName && <p className="text-white ml-4 mt-2">{pictureName}</p>}
@@ -194,7 +200,7 @@ export default function DashboardPage() {
 
   function ProjectTable({ Pieces, Tab, onOpenSubmitModal, onOpenViewPieceModal }) {
     return (
-      <div className="rounded-md bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white overflow-x-auto">
+      <div className="rounded-md bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 text-white overflow-x-auto max-h-96 overflow-y-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -235,7 +241,7 @@ export default function DashboardPage() {
                       onClick={() => onOpenSubmitModal(null, piece._id, null)}
                     >
                       <CheckCheck className="mr-2 h-4 w-4" />
-                      Move to Next Section
+                      {!isSectionFiveUser ? 'Move to Next Section' : "Mark Complete"}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -335,7 +341,7 @@ export default function DashboardPage() {
                         {isSectionOneUser ? (
                           <div className="mt-4">
                             <div className="mb-4">
-                              <input
+                              <Input
                                 ref={searchInputRef}
                                 type="text"
                                 placeholder="Search by code ..."
@@ -455,7 +461,9 @@ export default function DashboardPage() {
         const sectionNumber = User?.section?.number
 
         const formData = new FormData()
-        formData.append("file", selectedImage)
+        if(!isSectionFiveUser){
+          formData.append("file", selectedImage)
+        }
         formData.append("sectionNumber", sectionNumber)
         formData.append("code", selectedCode)
 
@@ -482,14 +490,14 @@ export default function DashboardPage() {
         })
         setOrders(ordersResponse.data.data)
         setPiecesCount(ordersResponse.data.piecesCount)
-        
+
       } catch (error) {
         console.error("Error submitting data:", error)
         showErrorToast(`Error submitting data: ${error.response?.data?.message}`)
       }
     }
 
-    const isSubmitDisabled = !selectedImage || !Object.values(checkedStates).includes(true)
+    const isSubmitDisabled = (!isSectionFiveUser && !selectedImage) || !Object.values(checkedStates).includes(true)
 
     return (
       <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
@@ -510,12 +518,12 @@ export default function DashboardPage() {
                         onCheckedChange={() => handleCheckboxChange(task._id || index)}
                         className="border-blue-400 text-blue-400"
                       />
-                      <label
+                      <Label
                         htmlFor={task._id || index}
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
                         {task.description || `QA Task ${index + 1}`}
-                      </label>
+                      </Label>
                     </div>
                   ))
                 ) : (
@@ -523,7 +531,7 @@ export default function DashboardPage() {
                 )}
               </div>
               <Separator className="my-6 bg-gray-700" />
-              <PictureUpload onImageSelect={setSelectedImage} />
+              {!isSectionFiveUser && <PictureUpload onImageSelect={setSelectedImage} />}
             </CardContent>
             <CardFooter className="flex justify-end space-x-2 mt-4">
               <Button
@@ -714,7 +722,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {!isSectionOneUser && (
+          {!isSectionOneUser && !isSectionFiveUser && (
             <Card className="bg-gray-800 bg-opacity-40 backdrop-filter backdrop-blur-lg border border-gray-700 mb-8 h-70 sm:h-72 lg:h-74 flex flex-col justify-between">
               <CardHeader>
                 <CardTitle className="text-white">QR Code Scanner</CardTitle>

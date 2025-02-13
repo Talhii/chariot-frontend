@@ -12,6 +12,7 @@ import { showSuccessToast, showErrorToast } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Label } from "@/components/ui/label"
 
 export default function EditPiece({ params }) {
   const pieceId = use(params)?.id
@@ -92,7 +93,7 @@ export default function EditPiece({ params }) {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400">Piece Number</label>
+                <Label className="text-sm font-medium text-gray-400">Piece Number</Label>
                 <Input
                   type="text"
                   name="number"
@@ -104,7 +105,7 @@ export default function EditPiece({ params }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400">Section</label>
+                <Label className="text-sm font-medium text-gray-400">Section</Label>
                 <Select
                   name="currentSectionId"
                   value={formData.currentSectionId._id}
@@ -124,7 +125,7 @@ export default function EditPiece({ params }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-400">Status</label>
+                <Label className="text-sm font-medium text-gray-400">Status</Label>
                 <Select name="status" value={formData.status} onValueChange={(value) => handleChange("status", value)}>
                   <SelectTrigger className="bg-gray-800 text-white border-gray-700">
                     <SelectValue placeholder="Select Status" />
