@@ -81,7 +81,14 @@ export default function Progress() {
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                     className="w-32 p-2 rounded-md bg-gray-800 text-white border border-gray-700"
+                    style={{
+                        WebkitAppearance: 'none',
+                        position: 'relative'
+                    }}
                 />
+                <style>
+                    {`input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1);`}
+                </style>
 
                 <Select onValueChange={(value) => setSelectedSection(value === "all" ? "" : value)}>
                     <SelectTrigger className="bg-gray-800 text-white border-gray-700">
