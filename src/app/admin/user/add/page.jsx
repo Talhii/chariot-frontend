@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, User } from "lucide-react"
-import { startRegistration } from "@simplewebauthn/browser"
 
 const roles = ["Admin", "Manager", "Worker"]
 
@@ -67,25 +66,6 @@ export default function AddUser() {
 
     try {
       setIsLoading(true)
-
-      if (formData.role === "Worker") {
-        // WebAuthn registration for Worker
-        const registrationOptions = await axios.post(
-          `${apiBaseUrl}/admin/webauthn/generate-registration-options`,
-          { username: formData.fullName },
-          { headers: { Authorization: `Bearer ${token}` } },
-        )
-
-        const attResp = await startRegistration(registrationOptions.data)
-
-        const verificationResp = await axios.post(`${apiBaseUrl}/admin/webauthn/verify-registration`, attResp, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (!verificationResp.data.verified) {
-          throw new Error("WebAuthn registration failed")
-        }
-      }
 
       const newUser = {
         fullName: formData.fullName,
